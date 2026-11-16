@@ -1,1521 +1,1542 @@
 <!DOCTYPE html>
-<html lang="zh-Hant" class="dark scroll-smooth">
+<html lang="zh-Hant" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>張育猷 Yu-Yu Chang | FPGA 韌體與軟硬體整合工程師</title>
-  <meta name="description" content="張育猷 (Yu-Yu Chang) - 專精於 FPGA 數位邏輯設計、嵌入式韌體開發、軟硬體協同驗證與最佳化演算法實現。" />
-  
-  <!-- Google Fonts: Inter, Noto Sans TC, JetBrains Mono -->
+  <title>SHELBY // PHOTOREALISTIC COSMOS GAMER PROFILE</title>
+  <meta name="description" content="SHELBY - 深夜星海旅人 // 跨星系組隊常駐玩家。剛在同一局遇見嗎？歡迎登艦加 Steam 好友！" />
+
+  <!-- Google Fonts: Orbitron, Space Grotesk, JetBrains Mono, Noto Sans TC -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700;900&family=Orbitron:wght@600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
-      darkMode: 'class',
       theme: {
         extend: {
           fontFamily: {
-            sans: ['"Inter"', '"Noto Sans TC"', 'sans-serif'],
+            display: ['"Orbitron"', '"Noto Sans TC"', 'sans-serif'],
+            space: ['"Space Grotesk"', '"Noto Sans TC"', 'sans-serif'],
             mono: ['"JetBrains Mono"', 'monospace'],
-          },
-          colors: {
-            slate: {
-              850: '#151F32',
-              900: '#0F172A',
-              950: '#090D16',
-            },
-            tech: {
-              cyan: '#06B6D4',
-              cyanLight: '#22D3EE',
-              amber: '#F59E0B',
-              amberLight: '#FBBF24',
-            }
-          },
-          boxShadow: {
-            'cyan-glow': '0 0 25px -5px rgba(6, 182, 212, 0.25)',
-            'amber-glow': '0 0 25px -5px rgba(245, 158, 11, 0.22)',
+            sans: ['"Noto Sans TC"', '"Space Grotesk"', 'sans-serif'],
           }
         }
       }
     };
   </script>
 
+  <!-- Three.js r128 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
   <style>
-    /* 微光電路網格背景紋理 */
-    .circuit-grid-dark {
-      background-color: #0F172A;
-      background-image: 
-        radial-gradient(circle at 15% 15%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 85% 30%, rgba(245, 158, 11, 0.05) 0%, transparent 38%),
-        linear-gradient(to right, rgba(148, 163, 184, 0.05) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
-      background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #02040a;
+      color: #f1f5f9;
+      overflow-x: hidden;
     }
 
-    .circuit-grid-light {
-      background-color: #F8FAFC;
-      background-image: 
-        radial-gradient(circle at 15% 15%, rgba(6, 182, 212, 0.09) 0%, transparent 42%),
-        radial-gradient(circle at 85% 30%, rgba(245, 158, 11, 0.06) 0%, transparent 40%),
-        linear-gradient(to right, rgba(15, 23, 42, 0.045) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(15, 23, 42, 0.045) 1px, transparent 1px);
-      background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+    /* 全螢幕 3D 擬真宇宙畫布 */
+    #cosmos-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 0;
+      cursor: grab;
+    }
+    #cosmos-canvas:active {
+      cursor: grabbing;
     }
 
-    /* 滾動淡入動畫 */
-    .reveal {
+    /* 輕量通透的宇宙玻璃擬態面板，不遮擋背景擬真星球 */
+    .orbital-glass {
+      background: linear-gradient(145deg, rgba(8, 13, 26, 0.56) 0%, rgba(4, 7, 16, 0.42) 100%);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(125, 211, 252, 0.22);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .orbital-card {
+      background: linear-gradient(145deg, rgba(9, 15, 30, 0.52) 0%, rgba(5, 8, 18, 0.38) 100%);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s ease, box-shadow 0.28s ease;
+    }
+    .orbital-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(56, 189, 248, 0.5);
+      box-shadow: 0 16px 40px rgba(14, 165, 233, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+
+    /* 星光漸層標題 */
+    .exoplanet-title {
+      background: linear-gradient(115deg, #ffffff 0%, #bae6fd 45%, #93c5fd 75%, #fde68a 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 24px rgba(56, 189, 248, 0.32));
+    }
+
+    /* Steam 傳送門發光按鈕 */
+    .steam-portal-btn {
+      background: linear-gradient(135deg, #0284c7 0%, #2563eb 52%, #4f46e5 100%);
+      box-shadow: 0 0 26px rgba(14, 165, 233, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.32);
+      transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
+    }
+    .steam-portal-btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+      box-shadow: 0 0 36px rgba(56, 189, 248, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    }
+
+    /* 純賞星模式隱藏動畫 */
+    #hud-layer {
+      transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #hud-layer.hud-hidden {
       opacity: 0;
-      transform: translateY(22px);
-      transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: translateY(12px) scale(0.985);
+      pointer-events: none;
     }
-    .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
+
+    /* 載入遮罩淡出 */
+    #cosmos-loader {
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+    #cosmos-loader.loaded {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    /* HUD 隱藏過渡動畫 */
+    #hud-layer {
+      transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #hud-layer.hud-hidden {
+      opacity: 0;
+      transform: translateY(12px) scale(0.985);
+      pointer-events: none;
     }
 
     /* 自訂捲軸 */
     ::-webkit-scrollbar {
-      width: 8px;
+      width: 6px;
     }
     ::-webkit-scrollbar-track {
-      background: #0F172A;
+      background: #02040a;
     }
     ::-webkit-scrollbar-thumb {
-      background: #1E293B;
+      background: rgba(56, 189, 248, 0.38);
       border-radius: 9999px;
-      border: 1px solid rgba(6, 182, 212, 0.25);
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #06B6D4;
-    }
-
-    /* Modal 動畫 */
-    .modal-backdrop {
-      transition: opacity 0.25s ease;
-    }
-    .modal-panel {
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
     }
   </style>
 </head>
-<body class="circuit-grid-dark text-slate-800 dark:text-slate-100 font-sans antialiased selection:bg-cyan-500/30 selection:text-cyan-200 transition-colors duration-300">
+<body class="font-sans antialiased selection:bg-sky-400 selection:text-slate-950">
 
-  <!-- ==================== 1. 頂部導覽列 (Navbar) ==================== -->
-  <header id="navbar" class="fixed top-0 inset-x-0 z-40 transition-all duration-300 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16 sm:h-18">
-        
-        <!-- 品牌標誌 YY.CHANG -->
-        <a href="#hero" class="flex items-center gap-2.5 group focus:outline-none">
-          <div class="w-9 h-9 rounded-lg bg-slate-900 dark:bg-slate-800 border border-cyan-500/50 flex items-center justify-center shadow-cyan-glow group-hover:border-cyan-400 transition-colors">
-            <!-- IC 晶片圖示 SVG -->
-            <svg class="w-5 h-5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <rect x="6" y="6" width="12" height="12" rx="2" />
-              <rect x="9" y="9" width="6" height="6" rx="0.5" class="fill-cyan-400/20" />
-              <path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4" stroke-linecap="round" />
-            </svg>
-          </div>
-          <div class="flex flex-col">
-            <span class="font-mono font-bold text-base sm:text-lg tracking-wider text-slate-900 dark:text-white group-hover:text-cyan-500 dark:group-hover:text-cyan-400 transition-colors">
-              YY<span class="text-cyan-500">.</span>CHANG
-            </span>
-            <span class="text-[10px] font-mono tracking-widest uppercase text-slate-500 dark:text-slate-400 -mt-1">
-              RTL // EMBEDDED
-            </span>
-          </div>
-        </a>
+  <!-- ==================== 全螢幕 3D 擬真宇宙畫布 ==================== -->
+  <canvas id="cosmos-canvas"></canvas>
 
-        <!-- 桌面版導覽連結 -->
-        <nav class="hidden md:flex items-center gap-1 lg:gap-2" aria-label="主導覽列">
-          <a href="#about" data-nav="about" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">關於我</a>
-          <a href="#skills" data-nav="skills" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">核心專長</a>
-          <a href="#experience" data-nav="experience" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">經歷與學歷</a>
-          <a href="#projects" data-nav="projects" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">專案與研究</a>
-          <a href="#contact" data-nav="contact" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">聯絡方式</a>
-        </nav>
-
-        <!-- 右側功能控制區：語言標籤 + 深淺色切換 + 行動版選單按鈕 -->
-        <div class="flex items-center gap-2 sm:gap-3">
-          <span class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-medium bg-slate-100 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700/80">
-            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-            ZH-TW / EN
-          </span>
-
-          <!-- 深淺色主題切換按鈕 -->
-          <button id="theme-toggle" type="button" aria-label="切換深淺色模式" class="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-amber-400 border border-slate-200 dark:border-slate-700 hover:border-cyan-500/50 transition-all">
-            <!-- 太陽圖示 (深色模式時顯示) -->
-            <svg id="icon-sun" class="w-4 h-4 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-            <!-- 月亮圖示 (淺色模式時顯示) -->
-            <svg id="icon-moon" class="w-4 h-4 block dark:hidden text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-            </svg>
-          </button>
-
-          <!-- 行動版漢堡選單按鈕 -->
-          <button id="mobile-menu-btn" type="button" aria-label="開啟導覽選單" aria-expanded="false" class="md:hidden p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path id="hamburger-path" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
+  <!-- ==================== 頂部星艦遙測與控制列 (始終保持可操作) ==================== -->
+  <header class="fixed top-0 inset-x-0 z-40 pointer-events-none">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 pt-4 flex flex-wrap items-center justify-between gap-2">
+      
+      <!-- 左側：星系座標與視角狀態 -->
+      <div class="pointer-events-auto orbital-glass rounded-full px-3.5 py-1.5 flex items-center gap-2.5 text-xs font-mono">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="text-sky-300 font-semibold tracking-wider">SHELBY // ORBITAL HUD</span>
+        <span id="telemetry-readout" class="hidden md:inline text-slate-400">YAW 0.0° · PITCH 0.0° · ZOOM 1.0x</span>
       </div>
-    </div>
 
-    <!-- 行動版下拉選單 -->
-    <div id="mobile-menu" class="hidden md:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-b border-slate-200 dark:border-slate-800 px-4 pt-2 pb-5 space-y-1">
-      <a href="#about" class="mobile-nav-link block px-3 py-2.5 rounded-lg text-base font-medium text-slate-700 dark:text-slate-200 hover:bg-cyan-500/10 hover:text-cyan-400">關於我</a>
-      <a href="#skills" class="mobile-nav-link block px-3 py-2.5 rounded-lg text-base font-medium text-slate-700 dark:text-slate-200 hover:bg-cyan-500/10 hover:text-cyan-400">核心專長</a>
-      <a href="#experience" class="mobile-nav-link block px-3 py-2.5 rounded-lg text-base font-medium text-slate-700 dark:text-slate-200 hover:bg-cyan-500/10 hover:text-cyan-400">經歷與學歷</a>
-      <a href="#projects" class="mobile-nav-link block px-3 py-2.5 rounded-lg text-base font-medium text-slate-700 dark:text-slate-200 hover:bg-cyan-500/10 hover:text-cyan-400">專案與研究</a>
-      <a href="#contact" class="mobile-nav-link block px-3 py-2.5 rounded-lg text-base font-medium text-slate-700 dark:text-slate-200 hover:bg-cyan-500/10 hover:text-cyan-400">聯絡方式</a>
+      <!-- 右側：重設視角 + 超空間躍遷 + 純賞星模式 -->
+      <div class="pointer-events-auto flex items-center gap-2">
+        <button id="reset-view-btn" type="button" title="重設宇宙視角與縮放" class="orbital-glass hover:border-sky-400/70 rounded-full px-3 py-1.5 text-xs font-mono text-slate-300 hover:text-white transition-all active:scale-95">
+          RESET VIEW
+        </button>
+
+        <button id="warp-btn" type="button" class="orbital-glass hover:border-amber-400/75 rounded-full px-3.5 py-1.5 text-xs font-mono font-semibold text-amber-300 flex items-center gap-1.5 transition-all active:scale-95">
+          <svg class="w-3.5 h-3.5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <span id="warp-label">WARP // 躍遷</span>
+        </button>
+
+        <button id="toggle-hud-btn" type="button" class="orbital-glass hover:border-sky-400/80 rounded-full px-3.5 py-1.5 text-xs font-mono font-semibold text-sky-200 flex items-center gap-1.5 transition-all active:scale-95">
+          <svg class="w-3.5 h-3.5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span id="hud-toggle-label">純賞星模式 // HIDE HUD</span>
+        </button>
+      </div>
     </div>
   </header>
 
-  <main class="pt-16">
-    <!-- ==================== 2. 首頁主視覺 (Hero Section) ==================== -->
-    <section id="hero" class="relative min-h-[calc(100vh-4rem)] flex items-center py-14 sm:py-20 overflow-hidden">
-      <!-- 背景微光光暈裝飾 -->
-      <div class="pointer-events-none absolute -top-24 -left-24 w-80 h-80 rounded-full bg-cyan-500/10 blur-3xl"></div>
-      <div class="pointer-events-none absolute bottom-10 right-0 w-96 h-96 rounded-full bg-amber-500/10 blur-3xl"></div>
-
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
-          
-          <!-- 左側個人核心介紹 -->
-          <div class="lg:col-span-7 space-y-6">
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-600 dark:text-cyan-400 text-xs sm:text-sm font-mono">
-              <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-              <span>SYSTEM_READY // FPGA & EMBEDDED R&D</span>
-            </div>
-
-            <div class="space-y-2">
-              <div class="flex flex-wrap items-baseline gap-3 sm:gap-4">
-                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                  張育猷
-                </h1>
-                <span class="text-lg sm:text-xl font-mono font-medium text-amber-600 dark:text-amber-400">
-                  Yu-Yu Chang
-                </span>
-              </div>
-              <h2 class="text-lg sm:text-xl lg:text-2xl font-semibold text-cyan-600 dark:text-cyan-400 tracking-wide">
-                FPGA 韌體與軟硬體整合工程師 <span class="text-slate-400 dark:text-slate-500 mx-1">|</span> 電機工程碩士
-              </h2>
-            </div>
-
-            <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
-              專注於<span class="text-slate-900 dark:text-white font-medium">高速數位邏輯設計（RTL）</span>、<span class="text-slate-900 dark:text-white font-medium">嵌入式韌體開發</span>與<span class="text-slate-900 dark:text-white font-medium">最佳化演算法硬體實現</span>。致力於打通從數學理論模型、底層邏輯閘時序到系統級軟硬體協同運作的最後一哩路。
-            </p>
-
-            <!-- CTA 按鈕列 -->
-            <div class="flex flex-wrap items-center gap-3.5 pt-2">
-              <a href="#projects" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold text-sm sm:text-base shadow-cyan-glow transition-all transform hover:-translate-y-0.5">
-                <span>瀏覽專案作品</span>
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </a>
-              <a href="#contact" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white dark:bg-slate-800/90 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 font-semibold text-sm sm:text-base border border-slate-300 dark:border-slate-700 hover:border-cyan-500/60 transition-all">
-                <span>聯絡我</span>
-              </a>
-            </div>
-
-            <!-- 社群與聯繫圖示連結 -->
-            <div class="flex items-center gap-4 pt-3 border-t border-slate-200/80 dark:border-slate-800/80 max-w-md">
-              <span class="text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400">Connect:</span>
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub" class="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:text-cyan-500 dark:hover:text-cyan-400 border border-slate-200 dark:border-slate-700/80 hover:border-cyan-500/50 transition-all">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-                </svg>
-              </a>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:text-cyan-500 dark:hover:text-cyan-400 border border-slate-200 dark:border-slate-700/80 hover:border-cyan-500/50 transition-all">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
-                </svg>
-              </a>
-              <a href="#contact" aria-label="Email 聯絡" class="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:text-amber-500 dark:hover:text-amber-400 border border-slate-200 dark:border-slate-700/80 hover:border-amber-500/50 transition-all">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </a>
-            </div>
-          </div>
-
-          <!-- 右側動態數位波形與系統狀態終端機卡片 -->
-          <div class="lg:col-span-5">
-            <div class="rounded-2xl bg-slate-900/95 border border-slate-700/90 shadow-2xl shadow-cyan-950/40 overflow-hidden backdrop-blur-md">
-              <!-- 終端機頂部視窗列 -->
-              <div class="flex items-center justify-between px-4 py-3 bg-slate-850 border-b border-slate-800">
-                <div class="flex items-center gap-2">
-                  <span class="w-3 h-3 rounded-full bg-rose-500/80"></span>
-                  <span class="w-3 h-3 rounded-full bg-amber-500/80"></span>
-                  <span class="w-3 h-3 rounded-full bg-emerald-500/80"></span>
-                  <span class="ml-2 text-xs font-mono text-slate-400">ila_wave_monitor.vcd</span>
-                </div>
-                <button id="burst-trigger-btn" type="button" class="px-2.5 py-1 rounded text-[11px] font-mono bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/40 transition-colors">
-                  TRIGGER AXI BURST
-                </button>
-              </div>
-
-              <!-- 互動式邏輯分析儀 Canvas -->
-              <div class="p-4 bg-slate-950/90 border-b border-slate-800/90">
-                <div class="flex items-center justify-between text-[11px] font-mono text-slate-400 mb-2">
-                  <span>ILA PROBE: <span class="text-cyan-400">200.0 MHz</span></span>
-                  <span>WNS: <span class="text-emerald-400">+0.412 ns</span></span>
-                </div>
-                <div class="relative w-full h-44 rounded-lg bg-slate-900/90 border border-slate-800 overflow-hidden">
-                  <canvas id="waveform-canvas" class="w-full h-full block"></canvas>
-                </div>
-              </div>
-
-              <!-- 系統核心狀態摘要 -->
-              <div class="p-4 sm:p-5 font-mono text-xs space-y-2.5 text-slate-300">
-                <div class="flex items-center justify-between">
-                  <span class="text-slate-400">$ arch --target</span>
-                  <span class="text-cyan-400">Zynq UltraScale+ / Artix-7</span>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="text-slate-400">$ bus --protocol</span>
-                  <span class="text-amber-400">AXI4-Stream / AXI-Lite / DMA</span>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="text-slate-400">$ thesis --solver</span>
-                  <span class="text-slate-200">TLS Robust Fitting (Bilevel)</span>
-                </div>
-                <div class="pt-2 border-t border-slate-800/90 flex items-center justify-between text-[11px]">
-                  <span class="text-emerald-400 flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                    TIMING MET (0 ERRORS)
-                  </span>
-                  <span class="text-slate-500">NSYSU EE M.S.</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== 3. 關於我 (About Me) ==================== -->
-    <section id="about" class="py-20 sm:py-24 border-t border-slate-200/70 dark:border-slate-800/80">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="reveal max-w-3xl mb-12">
-          <div class="inline-flex items-center gap-2 text-xs font-mono font-semibold tracking-widest uppercase text-cyan-600 dark:text-cyan-400 mb-2">
-            <span>01 // ABOUT ME</span>
-          </div>
-          <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white tracking-tight">
-            跨域整合：從硬體邏輯閘到最佳化演算法
-          </h2>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          <!-- 左側個人背景敘述 -->
-          <div class="reveal lg:col-span-7 rounded-2xl bg-white/80 dark:bg-slate-900/75 border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm space-y-4 text-slate-600 dark:text-slate-300 leading-relaxed text-base">
-            <p>
-              您好，我是<strong class="text-slate-900 dark:text-white font-semibold">張育猷</strong>，畢業於<strong class="text-cyan-600 dark:text-cyan-400 font-semibold">國立中山大學電機工程學系碩士班</strong>，目前具備 <strong class="text-slate-900 dark:text-white font-semibold">1.5 年以上 FPGA 軟硬體與嵌入式韌體實務開發經驗</strong>。
-            </p>
-            <p>
-              在工程實務中，我專注於 Verilog / SystemVerilog 數位電路設計、AXI 高速匯流排資料傳輸架構，以及嵌入式 SoC 的 Bare-metal / Embedded Linux 韌體與驅動整合。熟悉從 RTL 撰寫、合成時序收斂（Timing Closure）到板級邏輯分析儀（ILA / Oscilloscope）除錯的完整開發生命週期。
-            </p>
-            <p>
-              同時，碩士期間深耕<strong class="text-amber-600 dark:text-amber-400 font-semibold">截斷最小二乘法（Truncated Least Squares）</strong>與<strong class="text-amber-600 dark:text-amber-400 font-semibold">雙層最佳化（Bilevel Optimization）</strong>研究，使我不僅能處理底層硬體時序與記憶體頻寬瓶頸，更能將高複雜度數學演算法轉化為高平行度、低延遲的硬體加速架構。
-            </p>
-          </div>
-
-          <!-- 右側數據亮點卡片 -->
-          <div class="reveal lg:col-span-5 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-4">
-            <!-- 亮點 1 -->
-            <div class="rounded-2xl bg-white/80 dark:bg-slate-900/75 border border-slate-200 dark:border-slate-800 hover:border-cyan-500/50 p-5 sm:p-6 transition-all group">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400">INDUSTRY EXP.</span>
-                <span class="p-2 rounded-lg bg-cyan-500/10 text-cyan-500">
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-                  </svg>
-                </span>
-              </div>
-              <div class="text-2xl sm:text-3xl font-extrabold font-mono text-slate-900 dark:text-white group-hover:text-cyan-400 transition-colors">
-                1.5+ 年
-              </div>
-              <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                FPGA 邏輯設計、韌體開發與板級系統整合實務經驗
-              </p>
-            </div>
-
-            <!-- 亮點 2 -->
-            <div class="rounded-2xl bg-white/80 dark:bg-slate-900/75 border border-slate-200 dark:border-slate-800 hover:border-amber-500/50 p-5 sm:p-6 transition-all group">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400">ACADEMIC DEGREE</span>
-                <span class="p-2 rounded-lg bg-amber-500/10 text-amber-500">
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                  </svg>
-                </span>
-              </div>
-              <div class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white group-hover:text-amber-400 transition-colors">
-                國立中山大學 電機碩士
-              </div>
-              <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                專攻強健擬合（Robust Fitting）與雙層最佳化演算法
-              </p>
-            </div>
-
-            <!-- 亮點 3 -->
-            <div class="rounded-2xl bg-white/80 dark:bg-slate-900/75 border border-slate-200 dark:border-slate-800 hover:border-cyan-500/50 p-5 sm:p-6 transition-all group">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400">ARCHITECTURE</span>
-                <span class="p-2 rounded-lg bg-cyan-500/10 text-cyan-500">
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </span>
-              </div>
-              <div class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white group-hover:text-cyan-400 transition-colors">
-                HW / SW 軟硬體協同
-              </div>
-              <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                RTL 加速器設計、AXI DMA 傳輸與驅動層端到端整合
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== 4. 核心專長 (Technical Skills) ==================== -->
-    <section id="skills" class="py-20 sm:py-24 border-t border-slate-200/70 dark:border-slate-800/80 bg-slate-100/50 dark:bg-slate-950/40">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="reveal max-w-3xl mb-12">
-          <div class="inline-flex items-center gap-2 text-xs font-mono font-semibold tracking-widest uppercase text-cyan-600 dark:text-cyan-400 mb-2">
-            <span>02 // TECHNICAL SKILLS</span>
-          </div>
-          <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white tracking-tight">
-            核心技術棧與工程能力
-          </h2>
-          <p class="text-slate-600 dark:text-slate-400 mt-2 text-base">
-            涵蓋底層硬體描述語言、嵌入式系統韌體與高階演算法建模工具。
-          </p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
-          <!-- 類別 1：硬體與 FPGA 開發 -->
-          <div class="reveal rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-cyan-500/60 p-6 sm:p-7 shadow-sm hover:shadow-cyan-glow transition-all flex flex-col justify-between">
-            <div>
-              <div class="flex items-center justify-between mb-5">
-                <div class="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-500">
-                  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-                  </svg>
-                </div>
-                <span class="text-xs font-mono px-2.5 py-1 rounded-md bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
-                  RTL & HARDWARE
-                </span>
-              </div>
-
-              <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">
-                硬體與 FPGA 開發
-              </h3>
-              <p class="text-sm text-slate-600 dark:text-slate-400 mb-6">
-                具備同步數位電路設計、多時脈域（CDC）處理與高速匯流排介面整合實務能力。
-              </p>
-
-              <!-- 技能與熟練度列表 -->
-              <div class="space-y-3.5">
-                <div>
-                  <div class="flex justify-between text-xs font-mono mb-1">
-                    <span class="text-slate-800 dark:text-slate-200 font-semibold">Verilog / SystemVerilog</span>
-                    <span class="text-cyan-500">Core</span>
-                  </div>
-                  <div class="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                    <div class="h-full bg-gradient-to-r from-cyan-500 to-cyan-300 rounded-full" style="width: 92%"></div>
-                  </div>
-                </div>
-
-                <div>
-                  <div class="flex justify-between text-xs font-mono mb-1">
-                    <span class="text-slate-800 dark:text-slate-200 font-semibold">Vivado / Quartus</span>
-                    <span class="text-cyan-500">Proficient</span>
-                  </div>
-                  <div class="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                    <div class="h-full bg-gradient-to-r from-cyan-500 to-cyan-300 rounded-full" style="width: 90%"></div>
-                  </div>
-                </div>
-
-                <div>
-                  <div class="flex justify-between text-xs font-mono mb-1">
-                    <span class="text-slate-800 dark:text-slate-200 font-semibold">AXI4 / AXI-Stream Interface</span>
-                    <span class="text-cyan-500">Proficient</span>
-                  </div>
-                  <div class="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                    <div class="h-full bg-gradient-to-r from-cyan-500 to-cyan-300 rounded-full" style="width: 88%"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 技術標籤雲 -->
-            <div class="flex flex-wrap gap-2 mt-6 pt-5 border-t border-slate-200/80 dark:border-slate-800">
-              <span class="px-2.5 py-1 rounded-md text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">Timing Closure</span>
-              <span class="px-2.5 py-1 rounded-md text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">CDC / FIFO</span>
-              <span class="px-2.5 py-1 rounded-md text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">高速介面與數位電路</span>
-            </div>
-          </div>
-
-          <!-- 類別 2：韌體與嵌入式系統 -->
-          <div class="reveal rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-amber-500/60 p-6 sm:p-7 shadow-sm hover:shadow-amber-glow transition-all flex flex-col justify-between">
-            <div>
-              <div class="flex items-center justify-between mb-5">
-                <div class="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500">
-                  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                  </svg>
-                </div>
-                <span class="text-xs font-mono px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                  FIRMWARE & SOC
-                </span>
-              </div>
-
-              <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">
-                韌體與嵌入式系統
-              </h3>
-              <p class="text-sm text-slate-600 dark:text-slate-400 mb-6">
-                熟悉異質多核心 SoC 架構下的底層暫存器控制、中斷處理與裝置驅動程式開發。
-              </p>
-
-              <div class="space-y-3.5">
-                <div>
-                  <div class="flex justify-between text-xs font-mono mb-1">
-                    <span class="text-slate-800 dark:text-slate-200 font-semibold">C / C++ (Embedded)</span>
-                    <span class="text-amber-500">Core</span>
-                  </div>
-                  <div class="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                    <div class="h-full bg-gradient-to-r from-amber-500 to-amber-300 rounded-full" style="width: 90%"></div>
-                  </div>
-                </div>
-
-                <div>
-                  <div class="flex justify-between text-xs font-mono mb-1">
-                    <span class="text-slate-800 dark:text-slate-200 font-semibold">Bare-metal Firmware</span>
-                    <span class="text-amber-500">Proficient</span>
-                  </div>
-                  <div class="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                    <div class="h-full bg-gradient-to-r from-amber-500 to-amber-300 rounded-full" style="width: 88%"></div>
-                  </div>
-                </div>
-
-                <div>
-                  <div class="flex justify-between text-xs font-mono mb-1">
-                    <span class="text-slate-800 dark:text-slate-200 font-semibold">Embedded Linux</span>
-                    <span class="text-amber-500">Experienced</span>
-                  </div>
-                  <div class="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                    <div class="h-full bg-gradient-to-r from-amber-500 to-amber-300 rounded-full" style="width: 82%"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="flex flex-wrap gap-2 mt-6 pt-5 border-t border-slate-200/80 dark:border-slate-800">
-              <span class="px-2.5 py-1 rounded-md text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">MCU / SoC 驅動開發</span>
-              <span class="px-2.5 py-1 rounded-md text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">DMA / Interrupt</span>
-              <span class="px-2.5 py-1 rounded-md text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">SPI / I2C / UART</span>
-            </div>
-          </div>
-
-          <!-- 類別 3：演算法與軟體工具 -->
-          <div class="reveal rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-cyan-500/60 p-6 sm:p-7 shadow-sm hover:shadow-cyan-glow transition-all flex flex-col justify-between">
-            <div>
-              <div class="flex items-center justify-between mb-5">
-                <div class="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-500">
-                  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-                  </svg>
-                </div>
-                <span class="text-xs font-mono px-2.5 py-1 rounded-md bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
-                  ALGO & TOOLS
-                </span>
-              </div>
-
-              <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">
-                演算法與軟體工具
-              </h3>
-              <p class="text-sm text-slate-600 dark:text-slate-400 mb-6">
-                具備數值最佳化建模、黃金參考模型（Golden Model）驗證與自動化腳本開發能力。
-              </p>
-
-              <div class="space-y-3.5">
-                <div>
-                  <div class="flex justify-between text-xs font-mono mb-1">
-                    <span class="text-slate-800 dark:text-slate-200 font-semibold">Python / MATLAB</span>
-                    <span class="text-cyan-500">Core</span>
-                  </div>
-                  <div class="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                    <div class="h-full bg-gradient-to-r from-cyan-500 to-cyan-300 rounded-full" style="width: 90%"></div>
-                  </div>
-                </div>
-
-                <div>
-                  <div class="flex justify-between text-xs font-mono mb-1">
-                    <span class="text-slate-800 dark:text-slate-200 font-semibold">Bilevel Optimization</span>
-                    <span class="text-cyan-500">Research</span>
-                  </div>
-                  <div class="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                    <div class="h-full bg-gradient-to-r from-cyan-500 to-cyan-300 rounded-full" style="width: 88%"></div>
-                  </div>
-                </div>
-
-                <div>
-                  <div class="flex justify-between text-xs font-mono mb-1">
-                    <span class="text-slate-800 dark:text-slate-200 font-semibold">Git & Linux 環境</span>
-                    <span class="text-cyan-500">Proficient</span>
-                  </div>
-                  <div class="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                    <div class="h-full bg-gradient-to-r from-cyan-500 to-cyan-300 rounded-full" style="width: 87%"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="flex flex-wrap gap-2 mt-6 pt-5 border-t border-slate-200/80 dark:border-slate-800">
-              <span class="px-2.5 py-1 rounded-md text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">Robust Fitting</span>
-              <span class="px-2.5 py-1 rounded-md text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">Fixed-Point Modeling</span>
-              <span class="px-2.5 py-1 rounded-md text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">Shell / Makefile</span>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== 5. 經歷與學歷 (Experience & Education) ==================== -->
-    <section id="experience" class="py-20 sm:py-24 border-t border-slate-200/70 dark:border-slate-800/80">
-      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="reveal max-w-3xl mb-14">
-          <div class="inline-flex items-center gap-2 text-xs font-mono font-semibold tracking-widest uppercase text-cyan-600 dark:text-cyan-400 mb-2">
-            <span>03 // EXPERIENCE & EDUCATION</span>
-          </div>
-          <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white tracking-tight">
-            專業經歷與學術背景
-          </h2>
-        </div>
-
-        <!-- 電路走線風格時間軸 -->
-        <div class="relative pl-8 sm:pl-10 border-l-2 border-slate-300 dark:border-slate-700/90 space-y-12">
-          
-          <!-- 節點 1：軟硬體與韌體工程師 -->
-          <div class="reveal relative">
-            <!-- 時間軸焊點節點 -->
-            <div class="absolute -left-[41px] sm:-left-[49px] top-1.5 w-5 h-5 rounded-full bg-slate-900 border-4 border-cyan-400 shadow-cyan-glow"></div>
-
-            <div class="rounded-2xl bg-white/90 dark:bg-slate-900/85 border border-slate-200 dark:border-slate-800 hover:border-cyan-500/50 p-6 sm:p-8 shadow-sm transition-all">
-              <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30">
-                  WORK EXPERIENCE // 1.5 年實務經驗
-                </span>
-                <span class="text-xs font-mono text-slate-500 dark:text-slate-400">
-                  FPGA & EMBEDDED SYSTEMS
-                </span>
-              </div>
-
-              <h3 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
-                軟硬體與韌體工程師
-              </h3>
-              <p class="text-sm font-mono text-cyan-600 dark:text-cyan-400 mt-1 mb-4">
-                FPGA Logic Design · Firmware Architecture · System Bring-up
-              </p>
-
-              <ul class="space-y-2.5 text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed">
-                <li class="flex items-start gap-2.5">
-                  <span class="text-cyan-500 font-mono mt-1">▹</span>
-                  <span><strong class="text-slate-900 dark:text-white">FPGA 數位邏輯設計：</strong>使用 Verilog / SystemVerilog 開發高速資料擷取與訊號處理模組，完成時序約束（SDC/XDC）設定與 Timing Closure 最佳化。</span>
-                </li>
-                <li class="flex items-start gap-2.5">
-                  <span class="text-cyan-500 font-mono mt-1">▹</span>
-                  <span><strong class="text-slate-900 dark:text-white">韌體架構與驅動開發：</strong>撰寫 C/C++ 嵌入式韌體，實作 AXI-Lite 控制暫存器介面、AXI-DMA 高速搬移及硬體中斷服務常式（ISR）。</span>
-                </li>
-                <li class="flex items-start gap-2.5">
-                  <span class="text-cyan-500 font-mono mt-1">▹</span>
-                  <span><strong class="text-slate-900 dark:text-white">軟硬體介面整合與系統驗證除錯：</strong>建立 Testbench 進行 RTL 行為級與時序模擬，並結合 Vivado ILA 與示波器完成硬體板級除錯與穩定度壓力測試。</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- 節點 2：國立中山大學 電機工程學系 碩士 -->
-          <div class="reveal relative">
-            <!-- 時間軸焊點節點 -->
-            <div class="absolute -left-[41px] sm:-left-[49px] top-1.5 w-5 h-5 rounded-full bg-slate-900 border-4 border-amber-400 shadow-amber-glow"></div>
-
-            <div class="rounded-2xl bg-white/90 dark:bg-slate-900/85 border border-slate-200 dark:border-slate-800 hover:border-amber-500/50 p-6 sm:p-8 shadow-sm transition-all">
-              <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30">
-                  EDUCATION // MASTER OF SCIENCE
-                </span>
-                <span class="text-xs font-mono text-slate-500 dark:text-slate-400">
-                  NSYSU ELECTRICAL ENGINEERING
-                </span>
-              </div>
-
-              <h3 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
-                國立中山大學 電機工程學系 碩士
-              </h3>
-              <p class="text-sm font-mono text-amber-600 dark:text-amber-400 mt-1 mb-4">
-                National Sun Yat-sen University (NSYSU) · Department of Electrical Engineering
-              </p>
-
-              <ul class="space-y-2.5 text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed">
-                <li class="flex items-start gap-2.5">
-                  <span class="text-amber-500 font-mono mt-1">▹</span>
-                  <span><strong class="text-slate-900 dark:text-white">核心研究領域：</strong>專攻<strong class="text-slate-900 dark:text-white">截斷最小二乘法（Truncated Least Squares, TLS）</strong>強健擬合技術，解決高比例離群值（Outliers）干擾下的模型參數估測問題。</span>
-                </li>
-                <li class="flex items-start gap-2.5">
-                  <span class="text-amber-500 font-mono mt-1">▹</span>
-                  <span><strong class="text-slate-900 dark:text-white">雙層最佳化計算（Bilevel Optimization）：</strong>設計高效能求解演算法，降低非凸最佳化問題的計算複雜度，並以 MATLAB / Python 驗證收斂性與數值精度。</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== 6. 精選專案與研究 (Projects & Research) ==================== -->
-    <section id="projects" class="py-20 sm:py-24 border-t border-slate-200/70 dark:border-slate-800/80 bg-slate-100/50 dark:bg-slate-950/40">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="reveal flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-          <div>
-            <div class="inline-flex items-center gap-2 text-xs font-mono font-semibold tracking-widest uppercase text-cyan-600 dark:text-cyan-400 mb-2">
-              <span>04 // PROJECTS & RESEARCH</span>
-            </div>
-            <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white tracking-tight">
-              精選專案與學術研究
-            </h2>
-            <p class="text-slate-600 dark:text-slate-400 mt-2 text-base">
-              點擊任一卡片可檢視詳細系統架構圖、技術挑戰與量化成果。
-            </p>
-          </div>
-
-          <!-- 專案篩選標籤列 -->
-          <div class="inline-flex flex-wrap gap-2 p-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800" role="tablist" aria-label="專案分類篩選">
-            <button type="button" data-filter="all" class="filter-btn active px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all bg-cyan-500 text-slate-950 font-semibold shadow-sm">
-              全部 (3)
-            </button>
-            <button type="button" data-filter="fpga" class="filter-btn px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all text-slate-600 dark:text-slate-300 hover:text-cyan-500">
-              FPGA 與韌體
-            </button>
-            <button type="button" data-filter="algo" class="filter-btn px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all text-slate-600 dark:text-slate-300 hover:text-amber-400">
-              演算法研究
-            </button>
-          </div>
-        </div>
-
-        <!-- 專案卡片網格 -->
-        <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          
-          <!-- 專案卡片 1 -->
-          <article data-category="fpga" data-project-id="proj-1" class="project-card reveal group cursor-pointer rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-cyan-500/70 overflow-hidden shadow-sm hover:shadow-cyan-glow transition-all flex flex-col justify-between">
-            <div>
-              <!-- 自訂技術架構 SVG 視覺圖 -->
-              <div class="relative h-44 bg-slate-950 border-b border-slate-800 p-4 flex items-center justify-center overflow-hidden">
-                <div class="absolute top-3 left-3 px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
-                  PROJECT 01 // FPGA RTL
-                </div>
-                <svg class="w-full h-28 text-cyan-400 group-hover:scale-105 transition-transform duration-300" viewBox="0 0 320 110" fill="none">
-                  <!-- ADC Block -->
-                  <rect x="14" y="32" width="66" height="46" rx="6" fill="#0F172A" stroke="#06B6D4" stroke-width="1.5"/>
-                  <text x="47" y="52" text-anchor="middle" fill="#E2E8F0" font-family="monospace" font-size="10" font-weight="bold">HIGH-SPD</text>
-                  <text x="47" y="66" text-anchor="middle" fill="#22D3EE" font-family="monospace" font-size="9">ADC / LVDS</text>
-                  <!-- Arrow 1 -->
-                  <path d="M80 55 H114" stroke="#06B6D4" stroke-width="1.5" stroke-dasharray="3 2"/>
-                  <polygon points="114,51 122,55 114,59" fill="#06B6D4"/>
-                  <!-- DSP Pipeline Block -->
-                  <rect x="122" y="24" width="84" height="62" rx="6" fill="#0F172A" stroke="#F59E0B" stroke-width="1.5"/>
-                  <text x="164" y="48" text-anchor="middle" fill="#FBBF24" font-family="monospace" font-size="10" font-weight="bold">RTL PIPELINE</text>
-                  <text x="164" y="62" text-anchor="middle" fill="#94A3B8" font-family="monospace" font-size="8.5">FIR + Async FIFO</text>
-                  <text x="164" y="75" text-anchor="middle" fill="#22D3EE" font-family="monospace" font-size="8">AXI4-Stream</text>
-                  <!-- Arrow 2 -->
-                  <path d="M206 55 H238" stroke="#06B6D4" stroke-width="1.5"/>
-                  <polygon points="238,51 246,55 238,59" fill="#06B6D4"/>
-                  <!-- DMA / DDR Block -->
-                  <rect x="246" y="32" width="62" height="46" rx="6" fill="#0F172A" stroke="#06B6D4" stroke-width="1.5"/>
-                  <text x="277" y="52" text-anchor="middle" fill="#E2E8F0" font-family="monospace" font-size="10" font-weight="bold">AXI DMA</text>
-                  <text x="277" y="66" text-anchor="middle" fill="#34D399" font-family="monospace" font-size="9">DDR4 Ring</text>
-                </svg>
-              </div>
-
-              <div class="p-6">
-                <div class="flex flex-wrap gap-1.5 mb-3">
-                  <span class="px-2.5 py-0.5 rounded text-xs font-mono bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">Verilog</span>
-                  <span class="px-2.5 py-0.5 rounded text-xs font-mono bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">AXI-Stream</span>
-                  <span class="px-2.5 py-0.5 rounded text-xs font-mono bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">DMA</span>
-                </div>
-
-                <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white group-hover:text-cyan-500 dark:group-hover:text-cyan-400 transition-colors mb-2.5">
-                  FPGA 高速資料擷取與即時訊號處理系統
-                </h3>
-
-                <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                  設計多通道高速 ADC 資料擷取架構，結合跨時脈域非同步 FIFO、管線化數位濾波器與 AXI4-Stream DMA 零拷貝傳輸機制，實現低延遲連續串流寫入。
-                </p>
-              </div>
-            </div>
-
-            <div class="px-6 pb-6 pt-2 flex items-center justify-between text-xs font-mono text-cyan-600 dark:text-cyan-400">
-              <span>檢視架構與成果細節</span>
-              <span class="group-hover:translate-x-1 transition-transform">→</span>
-            </div>
-          </article>
-
-          <!-- 專案卡片 2 -->
-          <article data-category="fpga" data-project-id="proj-2" class="project-card reveal group cursor-pointer rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-cyan-500/70 overflow-hidden shadow-sm hover:shadow-cyan-glow transition-all flex flex-col justify-between">
-            <div>
-              <!-- 自訂技術架構 SVG 視覺圖 -->
-              <div class="relative h-44 bg-slate-950 border-b border-slate-800 p-4 flex items-center justify-center overflow-hidden">
-                <div class="absolute top-3 left-3 px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
-                  PROJECT 02 // HW/SW CO-DESIGN
-                </div>
-                <svg class="w-full h-28 group-hover:scale-105 transition-transform duration-300" viewBox="0 0 320 110" fill="none">
-                  <!-- PS Side -->
-                  <rect x="18" y="22" width="118" height="66" rx="6" fill="#0F172A" stroke="#22D3EE" stroke-width="1.5"/>
-                  <text x="77" y="42" text-anchor="middle" fill="#22D3EE" font-family="monospace" font-size="10" font-weight="bold">ARM Cortex-A (PS)</text>
-                  <rect x="28" y="50" width="98" height="28" rx="4" fill="#1E293B"/>
-                  <text x="77" y="67" text-anchor="middle" fill="#E2E8F0" font-family="monospace" font-size="9">C/C++ Driver & ISR</text>
-                  
-                  <!-- AXI Interconnect -->
-                  <path d="M136 44 H182" stroke="#F59E0B" stroke-width="1.5"/>
-                  <polygon points="182,40 188,44 182,48" fill="#F59E0B"/>
-                  <path d="M188 68 H142" stroke="#34D399" stroke-width="1.5"/>
-                  <polygon points="142,64 136,68 142,72" fill="#34D399"/>
-                  <text x="162" y="36" text-anchor="middle" fill="#FBBF24" font-family="monospace" font-size="8">AXI-Lite</text>
-                  <text x="162" y="81" text-anchor="middle" fill="#34D399" font-family="monospace" font-size="8">IRQ / DMA</text>
-
-                  <!-- PL Side -->
-                  <rect x="188" y="22" width="114" height="66" rx="6" fill="#0F172A" stroke="#F59E0B" stroke-width="1.5"/>
-                  <text x="245" y="42" text-anchor="middle" fill="#FBBF24" font-family="monospace" font-size="10" font-weight="bold">FPGA Fabric (PL)</text>
-                  <rect x="198" y="50" width="94" height="28" rx="4" fill="#1E293B"/>
-                  <text x="245" y="67" text-anchor="middle" fill="#E2E8F0" font-family="monospace" font-size="9">Custom IP Core</text>
-                </svg>
-              </div>
-
-              <div class="p-6">
-                <div class="flex flex-wrap gap-1.5 mb-3">
-                  <span class="px-2.5 py-0.5 rounded text-xs font-mono bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">C/C++</span>
-                  <span class="px-2.5 py-0.5 rounded text-xs font-mono bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">Zynq SoC</span>
-                  <span class="px-2.5 py-0.5 rounded text-xs font-mono bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">驅動開發</span>
-                </div>
-
-                <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white group-hover:text-cyan-500 dark:group-hover:text-cyan-400 transition-colors mb-2.5">
-                  嵌入式 SoC 韌體與硬體加速器協同驗證平台
-                </h3>
-
-                <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                  基於 Xilinx Zynq SoC 架構，建置 PS 端 ARM 處理器與 PL 端客製化運算 IP 之協同驗證框架，開發記憶體驗證驅動、暫存器映射表與自動化吞吐量基準測試工具。
-                </p>
-              </div>
-            </div>
-
-            <div class="px-6 pb-6 pt-2 flex items-center justify-between text-xs font-mono text-cyan-600 dark:text-cyan-400">
-              <span>檢視架構與成果細節</span>
-              <span class="group-hover:translate-x-1 transition-transform">→</span>
-            </div>
-          </article>
-
-          <!-- 研究卡片 3 -->
-          <article data-category="algo" data-project-id="proj-3" class="project-card reveal group cursor-pointer rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-amber-500/70 overflow-hidden shadow-sm hover:shadow-amber-glow transition-all flex flex-col justify-between">
-            <div>
-              <!-- 自訂演算法擬合 SVG 視覺圖 -->
-              <div class="relative h-44 bg-slate-950 border-b border-slate-800 p-4 flex items-center justify-center overflow-hidden">
-                <div class="absolute top-3 left-3 px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                  RESEARCH 03 // NSYSU THESIS
-                </div>
-                <svg class="w-full h-28 group-hover:scale-105 transition-transform duration-300" viewBox="0 0 320 110" fill="none">
-                  <!-- 座標軸 -->
-                  <line x1="30" y1="90" x2="290" y2="90" stroke="#334155" stroke-width="1.2"/>
-                  <line x1="30" y1="20" x2="30" y2="90" stroke="#334155" stroke-width="1.2"/>
-                  <!-- 傳統 LS 錯誤偏移線 -->
-                  <line x1="40" y1="78" x2="275" y2="34" stroke="#64748B" stroke-width="1.2" stroke-dasharray="4 3"/>
-                  <!-- TLS 強健擬合線 -->
-                  <line x1="40" y1="82" x2="275" y2="52" stroke="#F59E0B" stroke-width="2.2"/>
-                  <!-- Inliers 正常點 -->
-                  <circle cx="65" cy="78" r="3.5" fill="#22D3EE"/>
-                  <circle cx="105" cy="73" r="3.5" fill="#22D3EE"/>
-                  <circle cx="148" cy="68" r="3.5" fill="#22D3EE"/>
-                  <circle cx="192" cy="63" r="3.5" fill="#22D3EE"/>
-                  <circle cx="240" cy="56" r="3.5" fill="#22D3EE"/>
-                  <!-- Outliers 離群點 -->
-                  <circle cx="125" cy="28" r="4" stroke="#F43F5E" stroke-width="1.5" fill="#0F172A"/>
-                  <circle cx="215" cy="24" r="4" stroke="#F43F5E" stroke-width="1.5" fill="#0F172A"/>
-                  <text x="225" y="27" fill="#FDA4AF" font-family="monospace" font-size="8">Outliers Rejected</text>
-                  <text x="200" y="75" fill="#FBBF24" font-family="monospace" font-size="8.5" font-weight="bold">TLS Optimal Fit</text>
-                </svg>
-              </div>
-
-              <div class="p-6">
-                <div class="flex flex-wrap gap-1.5 mb-3">
-                  <span class="px-2.5 py-0.5 rounded text-xs font-mono bg-amber-500/10 text-amber-600 dark:text-amber-400">Truncated Least Squares</span>
-                  <span class="px-2.5 py-0.5 rounded text-xs font-mono bg-amber-500/10 text-amber-600 dark:text-amber-400">Bilevel Optimization</span>
-                  <span class="px-2.5 py-0.5 rounded text-xs font-mono bg-amber-500/10 text-amber-600 dark:text-amber-400">MATLAB/Python</span>
-                </div>
-
-                <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors mb-2.5">
-                  基於雙層最佳化之截斷最小二乘法強健擬合演算法
-                </h3>
-
-                <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                  針對感測器雜訊與高比例離群值干擾，提出結合雙層最佳化架構之截斷最小二乘法求解器，顯著提升參數估測準確度與收斂穩定性。
-                </p>
-              </div>
-            </div>
-
-            <div class="px-6 pb-6 pt-2 flex items-center justify-between text-xs font-mono text-amber-600 dark:text-amber-400">
-              <span>檢視研究方法與實驗數據</span>
-              <span class="group-hover:translate-x-1 transition-transform">→</span>
-            </div>
-          </article>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== 7. 聯絡方式 (Contact) ==================== -->
-    <section id="contact" class="py-20 sm:py-24 border-t border-slate-200/70 dark:border-slate-800/80">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="reveal max-w-3xl mb-12">
-          <div class="inline-flex items-center gap-2 text-xs font-mono font-semibold tracking-widest uppercase text-cyan-600 dark:text-cyan-400 mb-2">
-            <span>05 // CONTACT</span>
-          </div>
-          <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white tracking-tight">
-            建立技術交流與合作聯繫
-          </h2>
-          <p class="text-slate-600 dark:text-slate-400 mt-2 text-base">
-            無論是 FPGA 韌體研發職缺、軟硬體整合專案合作或演算法硬體加速交流，都歡迎隨時與我聯繫。
-          </p>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
-          <!-- 左側直接聯絡卡片與一鍵複製 Email -->
-          <div class="reveal lg:col-span-5 space-y-5">
-            <div class="rounded-2xl bg-white/90 dark:bg-slate-900/85 border border-slate-200 dark:border-slate-800 p-6 sm:p-7 shadow-sm space-y-6">
-              <div>
-                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1">直接聯繫資訊</h3>
-                <p class="text-sm text-slate-600 dark:text-slate-400">
-                  點擊下方按鈕可一鍵複製電子郵件信箱。
-                </p>
-              </div>
-
-              <!-- Email 複製區塊 -->
-              <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-                <div class="text-xs font-mono text-slate-500 dark:text-slate-400 mb-1.5">EMAIL ADDRESS</div>
-                <div class="flex items-center justify-between gap-2">
-                  <code id="email-text" class="text-sm sm:text-base font-mono text-cyan-600 dark:text-cyan-400 font-semibold truncate">
-                    yuyu.chang.ee@gmail.com
-                  </code>
-                  <button id="copy-email-btn" type="button" class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-semibold bg-cyan-500 hover:bg-cyan-400 text-slate-950 transition-colors">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                    <span id="copy-btn-label">複製</span>
-                  </button>
-                </div>
-                <p id="copy-feedback" class="hidden text-xs font-mono text-emerald-500 mt-2">
-                  ✓ 已複製信箱至剪貼簿！
-                </p>
-              </div>
-
-              <!-- 位置與狀態資訊 -->
-              <div class="space-y-3 text-sm">
-                <div class="flex items-center gap-3 text-slate-600 dark:text-slate-300">
-                  <span class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-cyan-500">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </span>
-                  <span>Taiwan (台灣) · 支援遠端與現場研發合作</span>
-                </div>
-
-                <div class="flex items-center gap-3 text-slate-600 dark:text-slate-300">
-                  <span class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-amber-500">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </span>
-                  <span>通常於 24 小時內回覆技術與面談邀約</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 右側互動式聯絡表單 -->
-          <div class="reveal lg:col-span-7">
-            <form id="contact-form" class="rounded-2xl bg-white/90 dark:bg-slate-900/85 border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm space-y-5">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div>
-                  <label for="sender-name" class="block text-xs font-mono uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-2">
-                    姓名 / 稱呼 <span class="text-rose-500">*</span>
-                  </label>
-                  <input id="sender-name" name="name" type="text" required placeholder="例如：王小明 / 研發部招募團隊" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors" />
-                </div>
-
-                <div>
-                  <label for="sender-email" class="block text-xs font-mono uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-2">
-                    電子郵件 Email <span class="text-rose-500">*</span>
-                  </label>
-                  <input id="sender-email" name="email" type="email" required placeholder="name@company.com" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors" />
-                </div>
-              </div>
-
-              <div>
-                <label for="message-subject" class="block text-xs font-mono uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-2">
-                  聯絡主旨 <span class="text-rose-500">*</span>
-                </label>
-                <input id="message-subject" name="subject" type="text" required placeholder="例如：FPGA 韌體工程師職缺面談 / 技術專案交流" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors" />
-              </div>
-
-              <div>
-                <label for="message-body" class="block text-xs font-mono uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-2">
-                  訊息內容 <span class="text-rose-500">*</span>
-                </label>
-                <textarea id="message-body" name="message" rows="4" required placeholder="請簡述您的需求、專案背景或聯繫事項..." class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-colors resize-y"></textarea>
-              </div>
-
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
-                <button type="submit" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold text-sm shadow-cyan-glow transition-all">
-                  <span>發送訊息</span>
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                  </svg>
-                </button>
-                <span class="text-xs font-mono text-slate-500 dark:text-slate-400">
-                  * 所有欄位皆為必填
-                </span>
-              </div>
-
-              <!-- 送出確認提示框 (取代 alert) -->
-              <div id="form-success-banner" class="hidden p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/40 text-emerald-700 dark:text-emerald-300 text-sm flex items-start gap-3">
-                <svg class="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div>
-                  <p class="font-semibold">訊息已成功送出！感謝您的聯繫。</p>
-                  <p id="form-success-detail" class="text-xs mt-1 opacity-90"></p>
-                </div>
-              </div>
-            </form>
-          </div>
-
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- ==================== 頁尾 (Footer) ==================== -->
-  <footer class="border-t border-slate-200 dark:border-slate-800/90 bg-white/60 dark:bg-slate-950/80 py-8">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-slate-500 dark:text-slate-400">
-      <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
-        <span>© 2026 張育猷 (Yu-Yu Chang). All Rights Reserved.</span>
-      </div>
-      <div>
-        <span>FPGA Firmware & HW/SW Co-Design Portfolio</span>
-      </div>
-    </div>
-  </footer>
-
-  <!-- ==================== 專案技術細節 Modal 彈窗 ==================== -->
-  <div id="project-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <!-- 半透明背景遮罩 -->
-    <div id="modal-backdrop" class="modal-backdrop fixed inset-0 bg-slate-950/80 backdrop-blur-sm opacity-0"></div>
-
-    <!-- Modal 內容面板 -->
-    <div id="modal-panel" class="modal-panel relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl p-6 sm:p-8 opacity-0 scale-95">
-      <div class="flex items-start justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
-        <div>
-          <span id="modal-badge" class="inline-block px-2.5 py-0.5 rounded text-xs font-mono font-semibold bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 mb-2">
-            PROJECT DETAIL
-          </span>
-          <h3 id="modal-title" class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
-            專案標題
-          </h3>
-        </div>
-        <button id="modal-close-btn" type="button" aria-label="關閉視窗" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-
-      <div class="mt-5 space-y-5 text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
-        <div>
-          <h4 class="text-xs font-mono uppercase tracking-wider text-cyan-600 dark:text-cyan-400 font-semibold mb-1.5">
-            01 // 系統背景與目標 (Overview)
-          </h4>
-          <p id="modal-overview"></p>
-        </div>
-
-        <div>
-          <h4 class="text-xs font-mono uppercase tracking-wider text-cyan-600 dark:text-cyan-400 font-semibold mb-1.5">
-            02 // 核心技術架構與解決方案 (Architecture & Implementation)
-          </h4>
-          <ul id="modal-architecture" class="space-y-2"></ul>
-        </div>
-
-        <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-          <h4 class="text-xs font-mono uppercase tracking-wider text-amber-600 dark:text-amber-400 font-semibold mb-2">
-            03 // 驗證結果與量化效益 (Key Outcomes)
-          </h4>
-          <ul id="modal-results" class="space-y-1.5 text-sm"></ul>
-        </div>
-
-        <div>
-          <h4 class="text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 font-semibold mb-2">
-            使用的技術棧 (Tech Stack)
-          </h4>
-          <div id="modal-tags" class="flex flex-wrap gap-2"></div>
-        </div>
-      </div>
+  <!-- 純賞星模式底部操作提示 -->
+  <div id="stargaze-banner" class="fixed bottom-6 inset-x-0 z-30 flex justify-center pointer-events-none opacity-0 transition-opacity duration-500">
+    <div class="orbital-glass rounded-full px-5 py-2 text-xs font-mono text-sky-200/90 flex items-center gap-2.5">
+      <span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping"></span>
+      <span>移動滑鼠傾斜星系 · 按住拖曳 360° 環繞行星 · 滾輪縮放觀察大氣層與光環</span>
     </div>
   </div>
 
-  <!-- ==================== 互動邏輯與波形動畫腳本 ==================== -->
+  <!-- ==================== 懸浮星際玻璃主介面 (刻意留白中央視野欣賞星球) ==================== -->
+  <main id="hud-layer" class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-16 pointer-events-none">
+    
+    <!-- 上半部左右分欄：左側名片，右側留出大片宇宙視野給擬真類地行星與土星光環 -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      
+      <!-- 左側主名片卡 (佔 6 欄，保持通透) -->
+      <section aria-labelledby="gamer-title" class="lg:col-span-6 pointer-events-auto orbital-glass rounded-3xl p-6 sm:p-8">
+        <div class="flex items-center justify-between gap-2 mb-4">
+
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/15 border border-sky-400/35 text-sky-300 font-mono text-xs tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            ONLINE // 組隊常駐玩家
+          </span>
+          <span class="font-mono text-[11px] text-slate-400 hidden sm:inline">
+            SYS: SHELBY PRIME
+          </span>
+        </div>
+
+        <h1 id="gamer-title" class="exoplanet-title font-display font-black text-5xl sm:text-6xl tracking-wider uppercase mb-2">
+          SHELBY
+        </h1>
+
+        <p class="font-space text-base sm:text-lg text-sky-200/90 font-medium mb-4">
+          Deep-Space Co-op &amp; Ranked Player <span class="text-sky-400 mx-1">✦</span> 星海漫遊隊友
+        </p>
+
+        <p class="text-slate-200/90 text-sm sm:text-base leading-relaxed mb-6">
+          歡迎登艦！平常常駐 <span class="text-sky-300 font-medium">FPS 射擊、動作 RPG、生存建造與多人合作遊戲</span>。
+        </p>
+
+        <!-- Steam 主傳送按鈕 -->
+        <div class="space-y-3">
+          <a href="https://steamcommunity.com/profiles/76561198145461636/" target="_blank" rel="noopener noreferrer" class="steam-portal-btn w-full rounded-2xl px-6 py-4 text-white font-display font-bold text-sm sm:text-base tracking-wider flex items-center justify-center gap-3">
+            <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.605 0 11.979 0zM7.54 18.21l-1.473-.61c.262.543.714.999 1.314 1.25 1.297.539 2.793-.076 3.332-1.375.263-.63.264-1.319.005-1.949s-.75-1.121-1.377-1.383c-.624-.26-1.29-.249-1.878-.03l1.523.63c.956.4 1.409 1.5 1.009 2.455-.397.957-1.497 1.41-2.454 1.012H7.54zm11.415-9.303c0-1.662-1.353-3.015-3.015-3.015-1.665 0-3.015 1.353-3.015 3.015 0 1.665 1.35 3.015 3.015 3.015 1.663 0 3.015-1.35 3.015-3.015zm-5.273-.005c0-1.252 1.013-2.266 2.265-2.266 1.249 0 2.266 1.014 2.266 2.266 0 1.251-1.017 2.265-2.266 2.265-1.253 0-2.265-1.014-2.265-2.265z"/>
+            </svg>
+            <span>CONNECT ON STEAM // 加好友</span>
+            <span class="font-mono text-xs opacity-90">↗</span>
+          </a>
+
+          <!-- 雙欄一鍵複製晶片 -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <button type="button" data-copy="76561198145461636" data-label="Steam ID" class="copy-chip rounded-xl px-3.5 py-2.5 bg-slate-950/60 hover:bg-sky-950/60 border border-sky-400/25 hover:border-sky-400/65 text-left flex items-center justify-between gap-2 transition-all group">
+              <div class="min-w-0">
+                <div class="font-mono text-[10px] text-sky-400 uppercase">STEAM ID // COPY</div>
+                <div class="font-mono text-xs sm:text-sm text-white font-semibold truncate">76561198145461636</div>
+              </div>
+              <svg class="w-4 h-4 shrink-0 text-sky-400 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            </button>
+
+            <button type="button" data-copy="185195908" data-label="STEAM 好友代碼" class="copy-chip rounded-xl px-3.5 py-2.5 bg-slate-950/60 hover:bg-indigo-950/60 border border-indigo-400/25 hover:border-indigo-400/65 text-left flex items-center justify-between gap-2 transition-all group">
+              <div class="min-w-0">
+                <div class="font-mono text-[10px] text-indigo-300 uppercase">STEAM 好友代碼 // COPY</div>
+                <div class="font-mono text-xs sm:text-sm text-white font-semibold truncate">185195908</div>
+              </div>
+              <svg class="w-4 h-4 shrink-0 text-indigo-300 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            </button>
+              
+            <button type="button" data-copy="shelby5736" data-label="Discord ID" class="copy-chip rounded-xl px-3.5 py-2.5 bg-slate-950/60 hover:bg-red-950/60 border border-red-400/25 hover:border-red-400/65 text-left flex items-center justify-between gap-2 transition-all group">
+              <div class="min-w-0">
+                <div class="font-mono text-[10px] text-red-300 uppercase">Discord ID // COPY</div>
+                <div class="font-mono text-xs sm:text-sm text-white font-semibold truncate">shelby5736</div>
+              </div>
+              <svg class="w-4 h-4 shrink-0 text-red-300 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右側上方留白區，僅放一枚小巧的星體圖例標籤，讓擬真類地行星與土星光環完整展現 -->
+      <aside class="lg:col-span-6 flex flex-col items-start lg:items-end justify-between gap-4">
+        <div class="pointer-events-auto orbital-card rounded-2xl px-4 py-3 text-xs font-mono text-slate-300 max-w-xs">
+          <div class="text-sky-300 font-semibold mb-1">✦ INTERACTIVE COSMOS GUIDE</div>
+          <p class="text-slate-400 leading-relaxed">
+            移動滑鼠微調星系角度；按住左鍵或單指拖曳可 <span class="text-white">360° 環繞</span>觀察 <span class="text-sky-300">SHELBY PRIME</span> 海洋雲層與 <span class="text-amber-300">KRONOS-IX</span> 卡西尼環縫。
+          </p>
+        </div>
+      </aside>
+
+    </div>
+
+    <!-- 中段：三張精簡遊戲風格卡片 -->
+    <section aria-label="遊戲風格與常駐類型" class="mt-8 lg:mt-24 pointer-events-auto grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="orbital-card rounded-2xl p-5">
+        <div class="flex items-center justify-between font-mono text-[11px] text-sky-300 mb-2">
+          <span>SECTOR 01 // CO-OP &amp; RAID</span>
+          <span>95% SYNC</span>
+        </div>
+        <h2 class="font-display font-bold text-base sm:text-lg text-white mb-1.5">
+          多人合作遊戲與休閒類刷寶副本
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-300/90 leading-relaxed">
+          喜歡 Action RPG、生存建造與 PVE 團隊副本。<br>EX:LOL、RUST、桌遊模擬器(風聲愛好者)、Overcooked2
+        </p>
+      </div>
+
+      <div class="orbital-card rounded-2xl p-5">
+        <div class="flex items-center justify-between font-mono text-[11px] text-amber-300 mb-2">
+          <span>SECTOR 02 // RANKED FPS &amp; MMO</span>
+          <span>98% CHILL</span>
+        </div>
+        <h2 class="font-display font-bold text-base sm:text-lg text-white mb-1.5">
+          排位競技與戰術配合
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-300/90 leading-relaxed">
+          FPS 與競技對戰。<br>EX:CS2、傳說對決
+        </p>
+      </div>
+
+      <div class="orbital-card rounded-2xl p-5">
+        <div class="flex items-center justify-between font-mono text-[11px] text-indigo-300 mb-2">
+          <span>SECTOR 03 // LATE NIGHT LOBBY</span>
+          <span>90% ONLINE</span>
+        </div>
+        <h2 class="font-display font-bold text-base sm:text-lg text-white mb-1.5">
+          Available Time
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-300/90 leading-relaxed">
+          平日:After 7p.m. <br>周末:All Day
+        </p>
+      </div>
+    </section>
+
+    <!-- 下段：組隊邀請私訊生成器 (Squad Invite Message Generator) -->
+    <section aria-labelledby="invite-gen-title" class="mt-6 pointer-events-auto orbital-glass rounded-3xl p-6 sm:p-7">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-5 border-b border-white/10">
+        <div>
+          <span class="font-mono text-[11px] text-sky-400 tracking-widest block">SUBSPACE COMMS // 組隊邀請生成器</span>
+          <h2 id="invite-gen-title" class="font-display font-bold text-lg sm:text-xl text-white mt-0.5">
+            一鍵產生給 Shelby 的 Steam 打招呼訊息
+          </h2>
+        </div>
+        <span class="font-mono text-xs text-slate-400">
+          加好友不知道第一句說什麼？選個模式直接複製！
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        <!-- 左側選擇區 -->
+        <div class="lg:col-span-6 space-y-3.5">
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" data-mode="ranked" class="invite-mode-btn active rounded-xl px-3 py-2.5 border border-sky-400 bg-sky-500/20 text-white font-medium text-xs sm:text-sm text-left transition-all">
+              ⚔️ Ranked 排位衝分
+            </button>
+            <button type="button" data-mode="raid" class="invite-mode-btn rounded-xl px-3 py-2.5 border border-white/15 bg-slate-950/50 text-slate-300 hover:border-sky-400/50 font-medium text-xs sm:text-sm text-left transition-all">
+              💎 Co-op Raid 副本刷寶
+            </button>
+            <button type="button" data-mode="chill" class="invite-mode-btn rounded-xl px-3 py-2.5 border border-white/15 bg-slate-950/50 text-slate-300 hover:border-sky-400/50 font-medium text-xs sm:text-sm text-left transition-all">
+              🌙 Chill 深夜休閒
+            </button>
+            <button type="button" data-mode="voice" class="invite-mode-btn rounded-xl px-3 py-2.5 border border-white/15 bg-slate-950/50 text-slate-300 hover:border-sky-400/50 font-medium text-xs sm:text-sm text-left transition-all">
+              🎧 Voice Chat 語音聊天
+            </button>
+          </div>
+
+          <input id="lobby-game-input" type="text" placeholder="輸入剛剛一起玩的遊戲名稱 (選填，例如：Apex / 魔物獵人 / CS2)..." class="w-full rounded-xl px-4 py-2.5 bg-slate-950/65 border border-white/15 focus:border-sky-400 text-white text-xs sm:text-sm focus:outline-none transition-colors" />
+        </div>
+
+        <!-- 右側預覽與操作區 -->
+        <div class="lg:col-span-6 rounded-2xl bg-slate-950/70 border border-sky-400/25 p-4 flex flex-col justify-between gap-3">
+          <p id="invite-output-text" class="text-sky-100 text-sm leading-relaxed">
+            嗨 Shelby！剛剛在遊戲裡遇到你，想加個 Steam 好友一起打排位衝分！
+          </p>
+
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/10">
+            <button id="copy-invite-msg-btn" type="button" class="rounded-xl px-4 py-2 bg-sky-500/20 hover:bg-sky-500/35 border border-sky-400/45 text-sky-200 font-mono text-xs font-semibold transition-all">
+              複製邀請訊息
+            </button>
+            <a href="https://steamcommunity.com/profiles/76561198145461636/" target="_blank" rel="noopener noreferrer" class="rounded-xl px-4 py-2 bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-xs transition-all inline-flex items-center gap-1">
+              <span>前往 Steam 個人頁面</span>
+              <span>↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 頁尾 -->
+    <footer class="mt-8 text-center font-mono text-xs text-slate-400/80 pointer-events-auto">
+      <span>© 2026 Shelby Chang. All Rights Reserved. // SHELBY — STEAM: 76561198145461636</span>
+    </footer>
+  </main>
+
+  <!-- ==================== 浮動提示吐司 (Toast) ==================== -->
+  <div id="cosmos-toast" class="fixed bottom-6 right-6 z-50 pointer-events-none opacity-0 translate-y-4 transition-all duration-300">
+    <div class="orbital-glass rounded-2xl px-4 py-2.5 border-sky-400/60 text-white font-mono text-xs sm:text-sm flex items-center gap-2 shadow-2xl">
+      <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+      <span id="cosmos-toast-text">已複製到剪貼簿</span>
+    </div>
+  </div>
+
+  <!-- ==================== 電影級 3D 擬真行星與宇宙渲染腳本 ==================== -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       /* ---------------------------------------------------------
-         1. 深淺色主題切換 (預設為深色科技風 Dark Mode)
+         1. UI 互動控制：HUD 切換、剪貼簿複製、組隊邀請生成器
       --------------------------------------------------------- */
-      const htmlEl = document.documentElement;
-      const bodyEl = document.body;
-      const themeToggleBtn = document.getElementById('theme-toggle');
+      const hudLayer = document.getElementById('hud-layer');
+      const toggleHudBtn = document.getElementById('toggle-hud-btn');
+      const hudToggleLabel = document.getElementById('hud-toggle-label');
+      const stargazeBanner = document.getElementById('stargaze-banner');
+      let isHudHidden = false;
 
-      function applyTheme(isDark) {
-        if (isDark) {
-          htmlEl.classList.add('dark');
-          bodyEl.classList.remove('circuit-grid-light');
-          bodyEl.classList.add('circuit-grid-dark');
-        } else {
-          htmlEl.classList.remove('dark');
-          bodyEl.classList.remove('circuit-grid-dark');
-          bodyEl.classList.add('circuit-grid-light');
-        }
+      toggleHudBtn.addEventListener('click', () => {
+        isHudHidden = !isHudHidden;
+        hudLayer.classList.toggle('hud-hidden', isHudHidden);
+        hudToggleLabel.textContent = isHudHidden ? '顯示介面 // SHOW HUD' : '純賞星模式 // HIDE HUD';
+        stargazeBanner.classList.toggle('opacity-0', !isHudHidden);
+      });
+
+      const toastEl = document.getElementById('cosmos-toast');
+      const toastTextEl = document.getElementById('cosmos-toast-text');
+      let toastTimer = null;
+
+      function showToast(msg) {
+        toastTextEl.textContent = msg;
+        toastEl.classList.remove('opacity-0', 'translate-y-4');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toastEl.classList.add('opacity-0', 'translate-y-4');
+        }, 2500);
       }
 
-      themeToggleBtn.addEventListener('click', () => {
-        const isCurrentlyDark = htmlEl.classList.contains('dark');
-        applyTheme(!isCurrentlyDark);
-      });
-
-      /* ---------------------------------------------------------
-         2. 行動版漢堡選單控制
-      --------------------------------------------------------- */
-      const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-      const mobileMenu = document.getElementById('mobile-menu');
-      const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
-
-      mobileMenuBtn.addEventListener('click', () => {
-        const isHidden = mobileMenu.classList.contains('hidden');
-        mobileMenu.classList.toggle('hidden');
-        mobileMenuBtn.setAttribute('aria-expanded', String(isHidden));
-      });
-
-      mobileNavLinks.forEach(link => {
-        link.addEventListener('click', () => {
-          mobileMenu.classList.add('hidden');
-          mobileMenuBtn.setAttribute('aria-expanded', 'false');
-        });
-      });
-
-      /* ---------------------------------------------------------
-         3. 滾動淡入動畫 (Intersection Observer) 與導覽列高亮
-      --------------------------------------------------------- */
-      const revealEls = document.querySelectorAll('.reveal');
-      const revealObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-            revealObserver.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.12 });
-
-      revealEls.forEach(el => revealObserver.observe(el));
-
-      // 導覽列當前區塊高亮
-      const sections = document.querySelectorAll('section[id]');
-      const navLinks = document.querySelectorAll('.nav-link');
-
-      function highlightActiveNav() {
-        const scrollPos = window.scrollY + 140;
-        sections.forEach(sec => {
-          const top = sec.offsetTop;
-          const height = sec.offsetHeight;
-          const id = sec.getAttribute('id');
-          if (scrollPos >= top && scrollPos < top + height) {
-            navLinks.forEach(link => {
-              link.classList.remove('text-cyan-600', 'dark:text-cyan-400', 'bg-cyan-500/10');
-              if (link.dataset.nav === id) {
-                link.classList.add('text-cyan-600', 'dark:text-cyan-400', 'bg-cyan-500/10');
-              }
-            });
-          }
-        });
-      }
-      window.addEventListener('scroll', highlightActiveNav, { passive: true });
-      highlightActiveNav();
-
-      /* ---------------------------------------------------------
-         4. Hero 右側動態數位邏輯波形 (ILA Oscilloscope Canvas)
-      --------------------------------------------------------- */
-      const canvas = document.getElementById('waveform-canvas');
-      const ctx = canvas.getContext('2d');
-      const burstBtn = document.getElementById('burst-trigger-btn');
-
-      let phase = 0;
-      let burstFrames = 45;
-
-      burstBtn.addEventListener('click', () => {
-        burstFrames = 85;
-      });
-
-      function resizeCanvas() {
-        if (!canvas || !canvas.parentElement) return;
-        const rect = canvas.parentElement.getBoundingClientRect();
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      }
-
-      window.addEventListener('resize', resizeCanvas);
-      resizeCanvas();
-
-      function drawDigitalWaveforms() {
-        const width = canvas.width / (window.devicePixelRatio || 1);
-        const height = canvas.height / (window.devicePixelRatio || 1);
-
-        ctx.clearRect(0, 0, width, height);
-
-        // 背景細格線
-        ctx.strokeStyle = 'rgba(51, 65, 85, 0.35)';
-        ctx.lineWidth = 1;
-        for (let x = 0; x < width; x += 28) {
-          ctx.beginPath();
-          ctx.moveTo(x, 0);
-          ctx.lineTo(x, height);
-          ctx.stroke();
-        }
-
-        const labelWidth = 74;
-        const plotStart = labelWidth;
-        const plotWidth = width - plotStart - 10;
-
-        // 4 條數位訊號軌道定義
-        const channels = [
-          { name: 'SYS_CLK', color: '#22D3EE', yBase: 26, amp: 9, type: 'clk' },
-          { name: 'TVALID',  color: '#34D399', yBase: 66, amp: 9, type: 'valid' },
-          { name: 'TDATA',   color: '#FBBF24', yBase: 108, amp: 10, type: 'bus' },
-          { name: 'DMA_IRQ', color: '#F472B6', yBase: 148, amp: 8, type: 'irq' }
-        ];
-
-        const isBursting = burstFrames > 0;
-        if (burstFrames > 0) burstFrames--;
-
-        channels.forEach(ch => {
-          // 訊號名稱標籤
-          ctx.fillStyle = '#94A3B8';
-          ctx.font = '600 10px "JetBrains Mono", monospace';
-          ctx.fillText(ch.name, 8, ch.yBase + 3);
-
-          ctx.strokeStyle = ch.color;
-          ctx.lineWidth = 1.6;
-          ctx.beginPath();
-
-          const step = 18;
-          let prevHigh = false;
-
-          for (let px = 0; px <= plotWidth; px += 2) {
-            const x = plotStart + px;
-            const cycle = Math.floor((px + phase) / step);
-            let isHigh = false;
-
-            if (ch.type === 'clk') {
-              isHigh = cycle % 2 === 0;
-            } else if (ch.type === 'valid') {
-              isHigh = isBursting ? (cycle % 8 !== 0) : (cycle % 12 >= 3 && cycle % 12 <= 7);
-            } else if (ch.type === 'irq') {
-              isHigh = (!isBursting && cycle % 16 === 14);
-            }
-
-            if (ch.type === 'bus') {
-              // 匯流排六角形封包波形
-              const localPos = (px + phase) % (step * 2);
-              const topY = ch.yBase - ch.amp;
-              const botY = ch.yBase + ch.amp;
-              if (px === 0) {
-                ctx.moveTo(x, topY);
-              }
-              if (localPos < 4) {
-                ctx.lineTo(x, ch.yBase);
-              } else {
-                ctx.lineTo(x, topY);
-              }
-            } else {
-              const y = isHigh ? (ch.yBase - ch.amp) : (ch.yBase + ch.amp);
-              if (px === 0) {
-                ctx.moveTo(x, y);
-              } else {
-                if (isHigh !== prevHigh) {
-                  ctx.lineTo(x, prevHigh ? (ch.yBase - ch.amp) : (ch.yBase + ch.amp));
-                }
-                ctx.lineTo(x, y);
-              }
-              prevHigh = isHigh;
-            }
-          }
-          ctx.stroke();
-
-          // 如果是匯流排，補畫下半部對稱線形成資料封包框
-          if (ch.type === 'bus') {
-            ctx.beginPath();
-            const step2 = 18;
-            for (let px = 0; px <= plotWidth; px += 2) {
-              const x = plotStart + px;
-              const localPos = (px + phase) % (step2 * 2);
-              const botY = ch.yBase + ch.amp;
-              if (px === 0) ctx.moveTo(x, botY);
-              if (localPos < 4) {
-                ctx.lineTo(x, ch.yBase);
-              } else {
-                ctx.lineTo(x, botY);
-              }
-            }
-            ctx.stroke();
-          }
-        });
-
-        phase = (phase + (isBursting ? 2.4 : 1.1)) % 1440;
-        requestAnimationFrame(drawDigitalWaveforms);
-      }
-
-      /* ---------------------------------------------------------
-         5. 專案篩選與 Modal 細節彈窗
-      --------------------------------------------------------- */
-      const projectDetails = {
-        'proj-1': {
-          badge: 'PROJECT 01 // FPGA & FIRMWARE',
-          title: 'FPGA 高速資料擷取與即時訊號處理系統',
-          overview: '為解決高取樣率感測器資料在連續串流傳輸時的緩衝溢位與跨時脈域同步問題，設計一套基於 FPGA 的即時數位訊號前處理與高速 DMA 搬移系統。',
-          architecture: [
-            '使用 Verilog 設計高速介面接收模組，並透過非同步 FIFO（Async FIFO）安全跨越感測器時脈域與系統匯流排時脈域（CDC）。',
-            '建置管線化（Pipelined）數位濾波器與資料打包邏輯，將原始取樣封裝為標準 AXI4-Stream 封包格式。',
-            '整合 AXI-DMA 控制器並搭配雙緩衝（Ping-Pong Buffer）記憶體管理策略，確保高吞吐量寫入外部記憶體不掉幀。'
-          ],
-          results: [
-            '達成全管線化穩定運作並通過嚴格時序收斂（Timing Closure，WNS > 0），消除跨時脈域亞穩態風險。',
-            '透過 Vivado ILA 線上邏輯分析儀實測驗證，連續長時間擷取零遺失封包。'
-          ],
-          tags: ['Verilog / SystemVerilog', 'AXI4-Stream', 'AXI-DMA', 'Async FIFO / CDC', 'Vivado ILA', 'Timing Closure']
-        },
-        'proj-2': {
-          badge: 'PROJECT 02 // EMBEDDED SOC CO-DESIGN',
-          title: '嵌入式 SoC 韌體與硬體加速器協同驗證平台',
-          overview: '在異質多核心 SoC（ARM Processing System + FPGA Programmable Logic）架構上，建立標準化軟硬體協同控制與自動化驗證環境，縮短客製化演算法 IP 的上板驗證週期。',
-          architecture: [
-            '定義清晰的 Memory-Mapped Register Map，透過 AXI4-Lite 介面讓 PS 端韌體精準控制 PL 端加速器狀態機與參數配置。',
-            '以 C/C++ 開發 Bare-metal 裝置驅動程式，實作硬體完成中斷（IRQ）通知機制與 Cache Coherency（快取一致性）維護。',
-            '建立軟硬體協同自動化驗證腳本，比對 FPGA 硬體輸出與軟體 Golden Model 之數值誤差並量測端到端執行延遲。'
-          ],
-          results: [
-            '大幅降低 CPU 輪詢（Polling）負擔，並將核心運算卸載至 FPGA 硬體加速器執行，顯著提升整體系統吞吐效率。',
-            '建立模組化驅動架構，可直接複用於後續不同規格之硬體加速 IP 驗證專案。'
-          ],
-          tags: ['C / C++', 'Zynq SoC', 'Bare-metal Firmware', 'AXI4-Lite', 'Interrupt / ISR', 'HW/SW Co-Verification']
-        },
-        'proj-3': {
-          badge: 'RESEARCH 03 // NSYSU MASTER THESIS',
-          title: '基於雙層最佳化之截斷最小二乘法強健擬合演算法',
-          overview: '傳統最小二乘法（Least Squares）對離群值（Outliers）極度敏感，即使單一異常觀測點亦可能導致估測嚴重偏移。本研究於國立中山大學電機碩士班期間，針對高離群值比例情境提出強健擬合求解方法。',
-          architecture: [
-            '採用截斷最小二乘法（Truncated Least Squares, TLS）目標函數，自動抑制超過殘差閾值之異常資料點影響。',
-            '將非凸且具組合性質的離群值篩選與模型參數估測重構為雙層最佳化（Bilevel Optimization）問題架構。',
-            '設計高效能迭代求解策略，於 MATLAB 與 Python 環境建構大規模蒙地卡羅（Monte Carlo）合成與實測資料基準測試。'
-          ],
-          results: [
-            '在高離群值污染比例下，估測誤差顯著低於傳統最小二乘法與常見強健回歸基準方法，展現優異的抗噪強健性。',
-            '演算法具備結構化平行計算潛力，為後續轉化為低延遲 FPGA 硬體加速架構奠定理論基礎。'
-          ],
-          tags: ['Truncated Least Squares', 'Bilevel Optimization', 'Robust Fitting', 'MATLAB', 'Python', 'Mathematical Modeling']
-        }
-      };
-
-      // 篩選按鈕邏輯
-      const filterBtns = document.querySelectorAll('.filter-btn');
-      const projectCards = document.querySelectorAll('.project-card');
-
-      filterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const filter = btn.dataset.filter;
-
-          filterBtns.forEach(b => {
-            b.classList.remove('active', 'bg-cyan-500', 'text-slate-950', 'font-semibold', 'shadow-sm');
-            b.classList.add('text-slate-600', 'dark:text-slate-300');
-          });
-          btn.classList.add('active', 'bg-cyan-500', 'text-slate-950', 'font-semibold', 'shadow-sm');
-          btn.classList.remove('text-slate-600', 'dark:text-slate-300');
-
-          projectCards.forEach(card => {
-            if (filter === 'all' || card.dataset.category === filter) {
-              card.classList.remove('hidden');
-            } else {
-              card.classList.add('hidden');
-            }
-          });
-        });
-      });
-
-      // Modal 控制邏輯
-      const modal = document.getElementById('project-modal');
-      const modalBackdrop = document.getElementById('modal-backdrop');
-      const modalPanel = document.getElementById('modal-panel');
-      const modalCloseBtn = document.getElementById('modal-close-btn');
-
-      const modalBadge = document.getElementById('modal-badge');
-      const modalTitle = document.getElementById('modal-title');
-      const modalOverview = document.getElementById('modal-overview');
-      const modalArchitecture = document.getElementById('modal-architecture');
-      const modalResults = document.getElementById('modal-results');
-      const modalTags = document.getElementById('modal-tags');
-
-      function openProjectModal(projectId) {
-        const data = projectDetails[projectId];
-        if (!data) return;
-
-        modalBadge.textContent = data.badge;
-        modalTitle.textContent = data.title;
-        modalOverview.textContent = data.overview;
-
-        modalArchitecture.innerHTML = data.architecture.map(item => `
-          <li class="flex items-start gap-2.5">
-            <span class="text-cyan-500 font-mono mt-0.5">▹</span>
-            <span>${item}</span>
-          </li>
-        `).join('');
-
-        modalResults.innerHTML = data.results.map(item => `
-          <li class="flex items-start gap-2.5">
-            <span class="text-amber-500 font-mono mt-0.5">✓</span>
-            <span>${item}</span>
-          </li>
-        `).join('');
-
-        modalTags.innerHTML = data.tags.map(tag => `
-          <span class="px-2.5 py-1 rounded-md text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
-            ${tag}
-          </span>
-        `).join('');
-
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        document.body.style.overflow = 'hidden';
-
-        requestAnimationFrame(() => {
-          modalBackdrop.classList.remove('opacity-0');
-          modalPanel.classList.remove('opacity-0', 'scale-95');
-        });
-      }
-
-      function closeProjectModal() {
-        modalBackdrop.classList.add('opacity-0');
-        modalPanel.classList.add('opacity-0', 'scale-95');
-        setTimeout(() => {
-          modal.classList.add('hidden');
-          modal.classList.remove('flex');
-          document.body.style.overflow = '';
-        }, 240);
-      }
-
-      projectCards.forEach(card => {
-        card.addEventListener('click', () => openProjectModal(card.dataset.projectId));
-      });
-
-      modalCloseBtn.addEventListener('click', closeProjectModal);
-      modalBackdrop.addEventListener('click', closeProjectModal);
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-          closeProjectModal();
-        }
-      });
-
-      /* ---------------------------------------------------------
-         6. 一鍵複製 Email (使用 document.execCommand('copy'))
-      --------------------------------------------------------- */
-      const copyEmailBtn = document.getElementById('copy-email-btn');
-      const emailTextEl = document.getElementById('email-text');
-      const copyBtnLabel = document.getElementById('copy-btn-label');
-      const copyFeedback = document.getElementById('copy-feedback');
-
-      copyEmailBtn.addEventListener('click', () => {
-        const emailStr = emailTextEl.textContent.trim();
-        const tempTextarea = document.createElement('textarea');
-        tempTextarea.value = emailStr;
-        tempTextarea.setAttribute('readonly', '');
-        tempTextarea.style.position = 'fixed';
-        tempTextarea.style.opacity = '0';
-        document.body.appendChild(tempTextarea);
-        tempTextarea.select();
-
+      // 相容 iframe 的剪貼簿複製
+      function copyToClipboard(text, label) {
+        const temp = document.createElement('textarea');
+        temp.value = text;
+        temp.setAttribute('readonly', '');
+        temp.style.position = 'fixed';
+        temp.style.opacity = '0';
+        document.body.appendChild(temp);
+        temp.select();
         try {
           document.execCommand('copy');
-          copyBtnLabel.textContent = '已複製';
-          copyFeedback.classList.remove('hidden');
-          setTimeout(() => {
-            copyBtnLabel.textContent = '複製';
-            copyFeedback.classList.add('hidden');
-          }, 2600);
+          showToast(`已複製 ${label}：${text}`);
         } catch (err) {
-          copyFeedback.textContent = '請手動選取複製上方信箱位址';
-          copyFeedback.classList.remove('hidden');
+          showToast('請手動選取複製內容');
         } finally {
-          document.body.removeChild(tempTextarea);
+          document.body.removeChild(temp);
         }
+      }
+
+      document.querySelectorAll('.copy-chip').forEach(btn => {
+        btn.addEventListener('click', () => copyToClipboard(btn.dataset.copy, btn.dataset.label));
+      });
+
+      // 組隊邀請生成器
+      const inviteModeBtns = document.querySelectorAll('.invite-mode-btn');
+      const lobbyGameInput = document.getElementById('lobby-game-input');
+      const inviteOutputText = document.getElementById('invite-output-text');
+      const copyInviteMsgBtn = document.getElementById('copy-invite-msg-btn');
+      let selectedInviteMode = 'ranked';
+
+      const inviteTemplates = {
+        ranked: (g) => `嗨 Shelby！${g ? `剛剛在《${g}》遇到你，` : '剛剛在遊戲裡遇到你，'}想加個 Steam 好友一起打排位衝分！`,
+        raid: (g) => `哈囉 Shelby！${g ? `看到你也在玩《${g}》，` : ''}之後刷寶或打協力副本有缺隊友的話算我一份，一起輕鬆探險！`,
+        chill: (g) => `嗨 Shelby！${g ? `剛剛《${g}》同場玩得很開心，` : ''}加個 Steam 好友，半夜上線想找人輕鬆玩、不壓力隨時揪！`,
+        voice: (g) => `Yo Shelby！${g ? `《${g}》` : '遊戲'}缺語音隊友嗎？加個 Steam 好友，有空一起開麥聊天打遊戲！`
+      };
+
+      function updateInvitePreview() {
+        const game = lobbyGameInput.value.trim();
+        inviteOutputText.textContent = (inviteTemplates[selectedInviteMode] || inviteTemplates.ranked)(game);
+      }
+
+      inviteModeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          inviteModeBtns.forEach(b => {
+            b.classList.remove('active', 'border-sky-400', 'bg-sky-500/20', 'text-white');
+            b.classList.add('border-white/15', 'bg-slate-950/50', 'text-slate-300');
+          });
+          btn.classList.add('active', 'border-sky-400', 'bg-sky-500/20', 'text-white');
+          btn.classList.remove('border-white/15', 'bg-slate-950/50', 'text-slate-300');
+          selectedInviteMode = btn.dataset.mode;
+          updateInvitePreview();
+        });
+      });
+
+      lobbyGameInput.addEventListener('input', updateInvitePreview);
+      copyInviteMsgBtn.addEventListener('click', () => {
+        copyToClipboard(inviteOutputText.textContent.trim(), '組隊邀請訊息');
       });
 
       /* ---------------------------------------------------------
-         7. 聯絡表單送出確認提示
+         2. 3D 球面無接縫雜訊引擎 (3D Value Noise & FBM)
+         透過在單位球面上取樣 3D 座標，徹底消除經度 0°/360° 接縫與極區扭曲
       --------------------------------------------------------- */
-      const contactForm = document.getElementById('contact-form');
-      const formSuccessBanner = document.getElementById('form-success-banner');
-      const formSuccessDetail = document.getElementById('form-success-detail');
+      const perm = new Uint8Array(512);
+      const gradVal = new Float32Array(256);
+      (function initNoiseTable() {
+        let seed = 133742;
+        const rand = () => {
+          seed = (seed * 16807) % 2147483647;
+          return (seed - 1) / 2147483646;
+        };
+        const p = new Uint8Array(256);
+        for (let i = 0; i < 256; i++) {
+          p[i] = i;
+          gradVal[i] = rand();
+        }
+        for (let i = 255; i > 0; i--) {
+          const j = Math.floor(rand() * (i + 1));
+          const tmp = p[i];
+          p[i] = p[j];
+          p[j] = tmp;
+        }
+        for (let i = 0; i < 512; i++) perm[i] = p[i & 255];
+      })();
 
-      contactForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const nameVal = document.getElementById('sender-name').value.trim();
-        const subjectVal = document.getElementById('message-subject').value.trim();
+      function hash3(ix, iy, iz) {
+        return gradVal[perm[(perm[(perm[ix & 255] + (iy & 255)) & 255] + (iz & 255)) & 255]];
+      }
 
-        formSuccessDetail.textContent = `${nameVal} 您好，關於「${subjectVal}」的訊息已記錄，我將盡快透過 Email 與您聯繫。`;
-        formSuccessBanner.classList.remove('hidden');
-        contactForm.reset();
+      function noise3D(x, y, z) {
+        const ix = Math.floor(x);
+        const iy = Math.floor(y);
+        const iz = Math.floor(z);
+        const fx = x - ix;
+        const fy = y - iy;
+        const fz = z - iz;
+        const ux = fx * fx * (3 - 2 * fx);
+        const uy = fy * fy * (3 - 2 * fy);
+        const uz = fz * fz * (3 - 2 * fz);
 
-        setTimeout(() => {
-          formSuccessBanner.classList.add('hidden');
-        }, 6500);
+        const n000 = hash3(ix, iy, iz);
+        const n100 = hash3(ix + 1, iy, iz);
+        const n010 = hash3(ix, iy + 1, iz);
+        const n110 = hash3(ix + 1, iy + 1, iz);
+        const n001 = hash3(ix, iy, iz + 1);
+        const n101 = hash3(ix + 1, iy, iz + 1);
+        const n011 = hash3(ix, iy + 1, iz + 1);
+        const n111 = hash3(ix + 1, iy + 1, iz + 1);
+
+        const nx00 = n000 + ux * (n100 - n000);
+        const nx10 = n010 + ux * (n110 - n010);
+        const nx01 = n001 + ux * (n101 - n001);
+        const nx11 = n011 + ux * (n111 - n011);
+
+        const nxy0 = nx00 + uy * (nx10 - nx00);
+        const nxy1 = nx01 + uy * (nx11 - nx01);
+
+        return nxy0 + uz * (nxy1 - nxy0);
+      }
+
+      function fbm3D(x, y, z, octaves) {
+        let value = 0.0;
+        let amp = 0.5;
+        let freq = 1.0;
+        for (let i = 0; i < octaves; i++) {
+          value += amp * noise3D(x * freq, y * freq, z * freq);
+          freq *= 2.04;
+          amp *= 0.5;
+        }
+        return value;
+      }
+
+      function ridgedFbm3D(x, y, z, octaves) {
+        let value = 0.0;
+        let amp = 0.5;
+        let freq = 1.0;
+        for (let i = 0; i < octaves; i++) {
+          let n = 1.0 - Math.abs(noise3D(x * freq, y * freq, z * freq) * 2.0 - 1.0);
+          value += amp * n * n;
+          freq *= 2.1;
+          amp *= 0.5;
+        }
+        return value;
+      }
+
+      /* ---------------------------------------------------------
+         3. Three.js 電影級渲染器與場景初始化
+      --------------------------------------------------------- */
+      const canvas = document.getElementById('cosmos-canvas');
+      const telemetryReadout = document.getElementById('telemetry-readout');
+      const warpBtn = document.getElementById('warp-btn');
+      const warpLabel = document.getElementById('warp-label');
+      const resetViewBtn = document.getElementById('reset-view-btn');
+
+      const scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x02040a, 0.0022);
+
+      const camera = new THREE.PerspectiveCamera(46, window.innerWidth / window.innerHeight, 0.1, 1200);
+      camera.position.set(0, 2.8, 33);
+
+      const renderer = new THREE.WebGLRenderer({
+        canvas: canvas,
+        antialias: true,
+        alpha: false,
+        powerPreference: 'high-performance'
+      });
+      renderer.setClearColor(0x02040a, 1);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+      // 主宇宙旋轉群組
+      const universeGroup = new THREE.Group();
+      scene.add(universeGroup);
+
+      // 太陽光方向 (從右前上方照射，營造清晰立體的日夜晨昏線 Terminator)
+      const sunDirection = new THREE.Vector3(0.85, 0.36, 0.68).normalize();
+
+      const sunLight = new THREE.DirectionalLight(0xfffbeb, 2.35);
+      sunLight.position.copy(sunDirection).multiplyScalar(140);
+      scene.add(sunLight);
+
+      // 柔和星光環境補光，確保行星暗面輪廓清晰可見、不死黑
+      const ambientFill = new THREE.AmbientLight(0x1e293b, 0.75);
+      scene.add(ambientFill);
+
+      const starlightHemi = new THREE.HemisphereLight(0x38bdf8, 0x0f172a, 0.55);
+      scene.add(starlightHemi);
+
+      // 程式化柔光貼圖產生器
+      function createGlowTexture(stops) {
+        const c = document.createElement('canvas');
+        c.width = 256;
+        c.height = 256;
+        const ctx = c.getContext('2d');
+        const g = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+        stops.forEach(([offset, color]) => g.addColorStop(offset, color));
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, 256, 256);
+        return new THREE.CanvasTexture(c);
+      }
+
+      /* ---------------------------------------------------------
+         4. 遠方恆星與太陽日冕光暈 (Distant Sun & Lens Flare)
+      --------------------------------------------------------- */
+      const sunAnchor = new THREE.Group();
+      sunAnchor.position.copy(sunDirection).multiplyScalar(190);
+      universeGroup.add(sunAnchor);
+
+      const sunCoreSprite = new THREE.Sprite(
+        new THREE.SpriteMaterial({
+          map: createGlowTexture([
+            [0.0, 'rgba(255, 255, 255, 1.0)'],
+            [0.12, 'rgba(254, 243, 199, 0.92)'],
+            [0.35, 'rgba(125, 211, 252, 0.35)'],
+            [0.7, 'rgba(56, 189, 248, 0.08)'],
+            [1.0, 'rgba(0, 0, 0, 0.0)']
+          ]),
+          transparent: true,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending
+        })
+      );
+      sunCoreSprite.scale.set(68, 68, 1);
+      sunAnchor.add(sunCoreSprite);
+
+      // 水平星芒光斑
+      const anamorphicStreak = new THREE.Sprite(
+        new THREE.SpriteMaterial({
+          map: createGlowTexture([
+            [0.0, 'rgba(224, 242, 254, 0.85)'],
+            [0.3, 'rgba(56, 189, 248, 0.28)'],
+            [1.0, 'rgba(0, 0, 0, 0.0)']
+          ]),
+          transparent: true,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending
+        })
+      );
+      anamorphicStreak.scale.set(130, 7.5, 1);
+      sunAnchor.add(anamorphicStreak);
+
+      /* ---------------------------------------------------------
+         5. 自訂 GLSL 大氣瑞利/米氏散射光暈著色器 (Fresnel Atmosphere)
+      --------------------------------------------------------- */
+      function createAtmosphereMesh(radius, dayColorHex, twilightColorHex, intensity, power) {
+        const geo = new THREE.SphereGeometry(radius, 64, 64);
+        const mat = new THREE.ShaderMaterial({
+          uniforms: {
+            uSunDir: { value: sunDirection.clone() },
+            uDayColor: { value: new THREE.Color(dayColorHex) },
+            uTwilightColor: { value: new THREE.Color(twilightColorHex) },
+            uIntensity: { value: intensity },
+            uPower: { value: power }
+          },
+          vertexShader: `
+            varying vec3 vNormalWorld;
+            varying vec3 vViewDirWorld;
+            void main() {
+              vec4 worldPos = modelMatrix * vec4(position, 1.0);
+              vNormalWorld = normalize(mat3(modelMatrix) * normal);
+              vViewDirWorld = normalize(cameraPosition - worldPos.xyz);
+              gl_Position = projectionMatrix * viewMatrix * worldPos;
+            }
+          `,
+          fragmentShader: `
+            uniform vec3 uSunDir;
+            uniform vec3 uDayColor;
+            uniform vec3 uTwilightColor;
+            uniform float uIntensity;
+            uniform float uPower;
+            varying vec3 vNormalWorld;
+            varying vec3 vViewDirWorld;
+            void main() {
+              vec3 N = normalize(vNormalWorld);
+              vec3 V = normalize(vViewDirWorld);
+              // BackSide 球殼邊緣散射計算
+              float viewDot = dot(N, V);
+              float fresnel = pow(clamp(1.0 + viewDot, 0.0, 1.0), uPower);
+              float sunAlignment = dot(-N, normalize(uSunDir));
+              float dayFactor = smoothstep(-0.35, 0.55, sunAlignment);
+              float twilightBand = smoothstep(-0.45, 0.05, sunAlignment) * (1.0 - smoothstep(0.05, 0.45, sunAlignment));
+              vec3 scatterColor = mix(uDayColor, uTwilightColor, twilightBand * 0.65);
+              float alpha = fresnel * (dayFactor * 0.92 + 0.08) * uIntensity;
+              gl_FragColor = vec4(scatterColor, clamp(alpha, 0.0, 1.0));
+            }
+          `,
+          side: THREE.BackSide,
+          blending: THREE.AdditiveBlending,
+          transparent: true,
+          depthWrite: false
+        });
+        return new THREE.Mesh(geo, mat);
+      }
+
+      /* ---------------------------------------------------------
+         6. HERO PLANET 1: 擬真海洋類地行星 "SHELBY PRIME" (1024x512)
+         包含：高解析 Albedo 地表 + 山脈 Bump + 海面高光 Roughness + 獨立雲層 + GLSL 大氣層
+      --------------------------------------------------------- */
+      function generateTerranMaps(width, height) {
+        const albedoCanvas = document.createElement('canvas');
+        albedoCanvas.width = width;
+        albedoCanvas.height = height;
+        const aCtx = albedoCanvas.getContext('2d');
+        const aImg = aCtx.createImageData(width, height);
+
+        const bumpCanvas = document.createElement('canvas');
+        bumpCanvas.width = width;
+        bumpCanvas.height = height;
+        const bCtx = bumpCanvas.getContext('2d');
+        const bImg = bCtx.createImageData(width, height);
+
+        const roughCanvas = document.createElement('canvas');
+        roughCanvas.width = width;
+        roughCanvas.height = height;
+        const rCtx = roughCanvas.getContext('2d');
+        const rImg = rCtx.createImageData(width, height);
+
+        const cloudCanvas = document.createElement('canvas');
+        cloudCanvas.width = width;
+        cloudCanvas.height = height;
+        const cCtx = cloudCanvas.getContext('2d');
+        const cImg = cCtx.createImageData(width, height);
+
+        const aData = aImg.data;
+        const bData = bImg.data;
+        const rData = rImg.data;
+        const cData = cImg.data;
+
+        const seaLevel = 0.51;
+
+        for (let y = 0; y < height; y++) {
+          const v = y / (height - 1);
+          const phi = (v - 0.5) * Math.PI;
+          const cosPhi = Math.cos(phi);
+          const sinPhi = Math.sin(phi);
+          const absLat = Math.abs(v - 0.5) * 2.0; // 0 赤道 -> 1 極點
+
+          for (let x = 0; x < width; x++) {
+            const u = x / width;
+            const theta = u * Math.PI * 2.0;
+
+            // 單位球面 3D 座標，確保左右無接縫
+            const sx = cosPhi * Math.cos(theta);
+            const sy = sinPhi;
+            const sz = cosPhi * Math.sin(theta);
+
+            // Domain warping 扭曲大陸輪廓，使海岸線更自然
+            const warpX = fbm3D(sx * 1.8 + 3.1, sy * 1.8, sz * 1.8, 3) * 0.45;
+            const warpY = fbm3D(sx * 1.8, sy * 1.8 + 7.4, sz * 1.8, 3) * 0.45;
+            const warpZ = fbm3D(sx * 1.8, sy * 1.8, sz * 1.8 + 5.2, 3) * 0.45;
+
+            let elev = fbm3D((sx + warpX) * 2.1, (sy + warpY) * 2.1, (sz + warpZ) * 2.1, 6);
+            const ridge = ridgedFbm3D(sx * 4.5 + 1.2, sy * 4.5, sz * 4.5, 4);
+            const moisture = fbm3D(sx * 2.6 + 11.3, sy * 2.6 + 4.1, sz * 2.6, 4);
+
+            const idx = (y * width + x) * 4;
+
+            let r, g, b, bumpVal, roughVal;
+
+            // 極地冰蓋判斷
+            const polarIceThreshold = 0.83 - (elev - 0.5) * 0.18;
+
+            if (absLat > polarIceThreshold) {
+              // 極冠冰原
+              r = 236; g = 244; b = 252;
+              bumpVal = 145 + ridge * 40;
+              roughVal = 165;
+            } else if (elev < seaLevel) {
+              // 海洋區域：深海溝 -> 大陸棚淺海青藍漸層
+              const depth = Math.max(0, Math.min(1, (seaLevel - elev) / 0.24));
+              const shelf = Math.pow(1.0 - depth, 2.6);
+              r = Math.round(6 + shelf * 28);
+              g = Math.round(24 + shelf * 112);
+              b = Math.round(62 + shelf * 138);
+              bumpVal = 40;
+              roughVal = 52; // 低粗糙度讓海面反射太陽光澤
+            } else {
+              // 陸地區域
+              const landH = Math.min(1, (elev - seaLevel) / 0.34);
+              const mountainFactor = Math.max(0, (landH - 0.35) * 1.55) * ridge;
+
+              if (landH < 0.045) {
+                // 海岸沙灘與潟湖邊緣
+                r = 194; g = 182; b = 146;
+              } else if (mountainFactor > 0.42) {
+                // 高山雪峰與花崗岩脊
+                const snow = Math.min(1, (mountainFactor - 0.42) * 2.6);
+                r = Math.round(118 + snow * 124);
+                g = Math.round(112 + snow * 132);
+                b = Math.round(108 + snow * 140);
+              } else {
+                // 依緯度與濕度混合森林與沙漠生態系
+                const desertMask = Math.max(0, Math.min(1, (0.52 - moisture) * 3.2 * (1.0 - absLat * 0.8)));
+                // 溫帶/熱帶茂密森林 (深綠至橄欖綠)
+                const forestR = 34 + landH * 38;
+                const forestG = 78 + landH * 42;
+                const forestB = 42 + landH * 24;
+                // 乾旱沙漠/紅土高原
+                const desertR = 188 + landH * 28;
+                const desertG = 148 + landH * 24;
+                const desertB = 96 + landH * 20;
+
+                r = Math.round(forestR + (desertR - forestR) * desertMask);
+                g = Math.round(forestG + (desertG - forestG) * desertMask);
+                b = Math.round(forestB + (desertB - forestB) * desertMask);
+              }
+
+              bumpVal = Math.min(255, Math.round(95 + landH * 85 + mountainFactor * 120));
+              roughVal = 228; // 陸地為霧面漫反射
+            }
+
+            aData[idx] = r;
+            aData[idx + 1] = g;
+            aData[idx + 2] = b;
+            aData[idx + 3] = 255;
+
+            bData[idx] = bData[idx + 1] = bData[idx + 2] = bumpVal;
+            bData[idx + 3] = 255;
+
+            rData[idx] = rData[idx + 1] = rData[idx + 2] = roughVal;
+            rData[idx + 3] = 255;
+
+            // 獨立氣象雲層 (氣旋渦流雲帶)
+            const cWarpX = fbm3D(sx * 2.4 + 8.2, sy * 2.4, sz * 2.4, 3) * 0.65;
+            const cWarpZ = fbm3D(sx * 2.4, sy * 2.4 + 2.9, sz * 2.4, 3) * 0.65;
+            const cloudDensity = fbm3D((sx + cWarpX) * 3.1, sy * 3.8, (sz + cWarpZ) * 3.1, 5);
+            const cloudAlpha = Math.max(0, Math.min(255, Math.round((cloudDensity - 0.50) * 680)));
+
+            cData[idx] = 248;
+            cData[idx + 1] = 251;
+            cData[idx + 2] = 255;
+            cData[idx + 3] = cloudAlpha;
+          }
+        }
+
+        aCtx.putImageData(aImg, 0, 0);
+        bCtx.putImageData(bImg, 0, 0);
+        rCtx.putImageData(rImg, 0, 0);
+        cCtx.putImageData(cImg, 0, 0);
+
+        return {
+          albedo: new THREE.CanvasTexture(albedoCanvas),
+          bump: new THREE.CanvasTexture(bumpCanvas),
+          roughness: new THREE.CanvasTexture(roughCanvas),
+          clouds: new THREE.CanvasTexture(cloudCanvas)
+        };
+      }
+
+      /* ---------------------------------------------------------
+         7. HERO PLANET 2: 擬真光環氣態巨行星 "KRONOS-IX" (1024x512 + 卡西尼環縫)
+      --------------------------------------------------------- */
+      function generateGasGiantMaps(width, height) {
+        const albedoCanvas = document.createElement('canvas');
+        albedoCanvas.width = width;
+        albedoCanvas.height = height;
+        const aCtx = albedoCanvas.getContext('2d');
+        const aImg = aCtx.createImageData(width, height);
+        const aData = aImg.data;
+
+        // 土星/木星風格大氣緯向色帶
+        const bandStops = [
+          [0.00, [95, 108, 128]],
+          [0.14, [175, 152, 118]],
+          [0.26, [224, 198, 154]],
+          [0.36, [186, 134, 86]],
+          [0.46, [242, 224, 186]],
+          [0.52, [212, 168, 114]],
+          [0.62, [164, 116, 78]],
+          [0.74, [218, 192, 148]],
+          [0.86, [132, 138, 152]],
+          [1.00, [84, 96, 118]]
+        ];
+
+        function sampleBandColor(t) {
+          const clamped = Math.max(0, Math.min(1, t));
+          for (let i = 0; i < bandStops.length - 1; i++) {
+            const [t0, c0] = bandStops[i];
+            const [t1, c1] = bandStops[i + 1];
+            if (clamped >= t0 && clamped <= t1) {
+              const f = (clamped - t0) / (t1 - t0);
+              return [
+                c0[0] + (c1[0] - c0[0]) * f,
+                c0[1] + (c1[1] - c0[1]) * f,
+                c0[2] + (c1[2] - c0[2]) * f
+              ];
+            }
+          }
+          return bandStops[0][1];
+        }
+
+        for (let y = 0; y < height; y++) {
+          const v = y / (height - 1);
+          const phi = (v - 0.5) * Math.PI;
+          const cosPhi = Math.cos(phi);
+          const sinPhi = Math.sin(phi);
+
+          for (let x = 0; x < width; x++) {
+            const u = x / width;
+            const theta = u * Math.PI * 2.0;
+
+            const sx = cosPhi * Math.cos(theta);
+            const sy = sinPhi;
+            const sz = cosPhi * Math.sin(theta);
+
+            // 緯向噴流湍流擾動
+            const swirl = fbm3D(sx * 3.4, sy * 9.5, sz * 3.4, 5);
+            const fineStreak = fbm3D(sx * 2.2, sy * 22.0 + swirl * 1.4, sz * 2.2, 3);
+            const bandCoord = v + (swirl - 0.5) * 0.085 + (fineStreak - 0.5) * 0.028;
+
+            let [r, g, b] = sampleBandColor(bandCoord);
+
+            // 反氣旋大風暴斑 (Great Storm Oval)
+            const stormDx = (u - 0.34) * 2.1;
+            const stormDy = (v - 0.61) * 4.6;
+            const stormDist = Math.sqrt(stormDx * stormDx + stormDy * stormDy);
+            if (stormDist < 0.22) {
+              const stormFactor = Math.pow(1.0 - stormDist / 0.22, 1.6);
+              r = r + (232 - r) * stormFactor * 0.78;
+              g = g + (146 - g) * stormFactor * 0.78;
+              b = b + (92 - b) * stormFactor * 0.78;
+            }
+
+            const idx = (y * width + x) * 4;
+            aData[idx] = Math.round(r);
+            aData[idx + 1] = Math.round(g);
+            aData[idx + 2] = Math.round(b);
+            aData[idx + 3] = 255;
+          }
+        }
+        aCtx.putImageData(aImg, 0, 0);
+
+        // 生成同心圓細節光環貼圖 (含卡西尼環縫 Cassini Division 與數百道冰晶細環)
+        const ringCanvas = document.createElement('canvas');
+        ringCanvas.width = 1024;
+        ringCanvas.height = 32;
+        const rCtx = ringCanvas.getContext('2d');
+        const rImg = rCtx.createImageData(1024, 32);
+        const rData = rImg.data;
+
+        for (let x = 0; x < 1024; x++) {
+          const t = x / 1023; // 0 = 內環邊緣, 1 = 外環邊緣
+
+          // 基礎 C 環 -> B 環 -> 卡西尼環縫 -> A 環 -> F 細環結構
+          let density = 0.0;
+          if (t < 0.16) {
+            // 內側半透明 C 環
+            density = (t / 0.16) * 0.28;
+          } else if (t < 0.58) {
+            // 明亮濃密的 B 環
+            density = 0.72 + Math.sin(t * 95.0) * 0.16 + Math.cos(t * 240.0) * 0.08;
+          } else if (t < 0.645) {
+            // 卡西尼環縫 (Cassini Division) 深色間隙
+            density = 0.04;
+          } else if (t < 0.92) {
+            // 外側 A 環
+            density = 0.54 + Math.sin(t * 130.0) * 0.12 + Math.cos(t * 310.0) * 0.07;
+            // Encke 細縫
+            if (Math.abs(t - 0.85) < 0.008) density = 0.06;
+          } else if (t > 0.955 && t < 0.98) {
+            // 外圍細窄 F 環
+            density = 0.42;
+          }
+
+          density = Math.max(0, Math.min(1, density));
+
+          const rr = Math.round(218 - t * 32);
+          const gg = Math.round(196 - t * 24);
+          const bb = Math.round(166 + t * 18);
+          const aa = Math.round(density * 235);
+
+          for (let y = 0; y < 32; y++) {
+            const idx = (y * 1024 + x) * 4;
+            rData[idx] = rr;
+            rData[idx + 1] = gg;
+            rData[idx + 2] = bb;
+            rData[idx + 3] = aa;
+          }
+        }
+        rCtx.putImageData(rImg, 0, 0);
+
+        return {
+          albedo: new THREE.CanvasTexture(albedoCanvas),
+          ring: new THREE.CanvasTexture(ringCanvas)
+        };
+      }
+
+      /* ---------------------------------------------------------
+         8. HERO PLANET 3: 隕石坑岩石衛星地圖 (512x256)
+      --------------------------------------------------------- */
+      function generateMoonMaps(width, height) {
+        const albedoCanvas = document.createElement('canvas');
+        albedoCanvas.width = width;
+        albedoCanvas.height = height;
+        const aCtx = albedoCanvas.getContext('2d');
+        const aImg = aCtx.createImageData(width, height);
+
+        const bumpCanvas = document.createElement('canvas');
+        bumpCanvas.width = width;
+        bumpCanvas.height = height;
+        const bCtx = bumpCanvas.getContext('2d');
+        const bImg = bCtx.createImageData(width, height);
+
+        // 預先產生 65 個 3D 球面隕石坑中心與半徑
+        const craters = [];
+        for (let i = 0; i < 65; i++) {
+          const u = Math.random();
+          const v = Math.random();
+          const theta = u * Math.PI * 2;
+          const phi = (v - 0.5) * Math.PI;
+          craters.push({
+            x: Math.cos(phi) * Math.cos(theta),
+            y: Math.sin(phi),
+            z: Math.cos(phi) * Math.sin(theta),
+            r: 0.045 + Math.pow(Math.random(), 2.4) * 0.22
+          });
+        }
+
+        const aData = aImg.data;
+        const bData = bImg.data;
+
+        for (let y = 0; y < height; y++) {
+          const v = y / (height - 1);
+          const phi = (v - 0.5) * Math.PI;
+          const cosPhi = Math.cos(phi);
+          const sinPhi = Math.sin(phi);
+
+          for (let x = 0; x < width; x++) {
+            const u = x / width;
+            const theta = u * Math.PI * 2;
+            const sx = cosPhi * Math.cos(theta);
+            const sy = sinPhi;
+            const sz = cosPhi * Math.sin(theta);
+
+            const maria = fbm3D(sx * 2.3 + 4.2, sy * 2.3, sz * 2.3, 4);
+            const micro = fbm3D(sx * 14.0, sy * 14.0, sz * 14.0, 3);
+
+            let craterHeight = 0;
+            for (let c = 0; c < craters.length; c++) {
+              const cr = craters[c];
+              const dx = sx - cr.x;
+              const dy = sy - cr.y;
+              const dz = sz - cr.z;
+              const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+              if (dist < cr.r * 1.35) {
+                const t = dist / cr.r;
+                if (t < 1.0) {
+                  // 碗狀坑底凹陷
+                  craterHeight -= (1.0 - t * t) * 0.42;
+                } else {
+                  // 坑緣隆起環
+                  const rim = 1.0 - (t - 1.0) / 0.35;
+                  craterHeight += rim * rim * 0.24;
+                }
+              }
+            }
+
+            const baseShade = maria < 0.46 ? 88 : 148;
+            const shade = Math.max(35, Math.min(220, Math.round(baseShade + (micro - 0.5) * 48 + craterHeight * 95)));
+            const bump = Math.max(0, Math.min(255, Math.round(128 + (micro - 0.5) * 55 + craterHeight * 210)));
+
+            const idx = (y * width + x) * 4;
+            aData[idx] = shade;
+            aData[idx + 1] = Math.round(shade * 0.98);
+            aData[idx + 2] = Math.round(shade * 0.95);
+            aData[idx + 3] = 255;
+
+            bData[idx] = bData[idx + 1] = bData[idx + 2] = bump;
+            bData[idx + 3] = 255;
+          }
+        }
+
+        aCtx.putImageData(aImg, 0, 0);
+        bCtx.putImageData(bImg, 0, 0);
+
+        return {
+          albedo: new THREE.CanvasTexture(albedoCanvas),
+          bump: new THREE.CanvasTexture(bumpCanvas)
+        };
+      }
+
+      /* ---------------------------------------------------------
+         9. 組裝擬真行星系統與深空星海
+      --------------------------------------------------------- */
+      const terranMaps = generateTerranMaps(768, 384);
+      const gasGiantMaps = generateGasGiantMaps(768, 384);
+      const moonMaps = generateMoonMaps(384, 192);
+
+      // --- 行星 1: SHELBY PRIME (前景右側擬真海洋類地行星) ---
+      const terranSystem = new THREE.Group();
+      terranSystem.position.set(7.8, 1.0, 8.2);
+      terranSystem.rotation.z = 0.23; // 行星自轉軸傾角
+      universeGroup.add(terranSystem);
+
+      const terranSurface = new THREE.Mesh(
+        new THREE.SphereGeometry(4.7, 64, 64),
+        new THREE.MeshPhongMaterial({
+          map: terranMaps.albedo,
+          bumpMap: terranMaps.bump,
+          bumpScale: 0.16,
+          specularMap: terranMaps.roughness,
+          specular: new THREE.Color(0x38bdf8),
+          shininess: 22
+        })
+      );
+      terranSystem.add(terranSurface);
+
+      // 獨立高空雲層球體
+      const terranClouds = new THREE.Mesh(
+        new THREE.SphereGeometry(4.78, 64, 64),
+        new THREE.MeshLambertMaterial({
+          map: terranMaps.clouds,
+          transparent: true,
+          opacity: 0.9,
+          depthWrite: false
+        })
+      );
+      terranSystem.add(terranClouds);
+
+      // 擬真瑞利散射大氣光暈
+      const terranAtmosphere = createAtmosphereMesh(5.04, 0x38bdf8, 0xf97316, 1.25, 3.4);
+      terranSystem.add(terranAtmosphere);
+
+      // --- 行星 2: KRONOS-IX (中景左上方環狀氣態巨行星) ---
+      const gasGiantSystem = new THREE.Group();
+      gasGiantSystem.position.set(-12.5, 5.4, -13.5);
+      gasGiantSystem.rotation.z = 0.44;
+      gasGiantSystem.rotation.x = 0.28;
+      universeGroup.add(gasGiantSystem);
+
+      const gasGiantBody = new THREE.Mesh(
+        new THREE.SphereGeometry(5.8, 64, 64),
+        new THREE.MeshLambertMaterial({
+          map: gasGiantMaps.albedo
+        })
+      );
+      gasGiantSystem.add(gasGiantBody);
+
+      // 氣態巨行星暖金大氣光暈
+      const gasGiantAtmo = createAtmosphereMesh(6.14, 0xfbbf24, 0xf59e0b, 0.92, 3.8);
+      gasGiantSystem.add(gasGiantAtmo);
+
+      // 高細節同心圓卡西尼環系統 (重新映射 UV 為徑向)
+      const innerR = 7.4;
+      const outerR = 14.2;
+      const ringGeo = new THREE.RingGeometry(innerR, outerR, 128, 2);
+      const ringPos = ringGeo.attributes.position;
+      const ringUv = ringGeo.attributes.uv;
+      for (let i = 0; i < ringPos.count; i++) {
+        const vx = ringPos.getX(i);
+        const vy = ringPos.getY(i);
+        const r = Math.sqrt(vx * vx + vy * vy);
+        const uRadial = (r - innerR) / (outerR - innerR);
+        ringUv.setXY(i, uRadial, 0.5);
+      }
+
+      const ringMesh = new THREE.Mesh(
+        ringGeo,
+        new THREE.MeshBasicMaterial({
+          map: gasGiantMaps.ring,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.92,
+          depthWrite: false
+        })
+      );
+      ringMesh.rotation.x = Math.PI / 2;
+      gasGiantSystem.add(ringMesh);
+
+      // --- 行星 3: 隕石坑岩石衛星 (繞行 SHELBY PRIME) ---
+      const moonOrbit = new THREE.Group();
+      terranSystem.add(moonOrbit);
+
+      const rockyMoon = new THREE.Mesh(
+        new THREE.SphereGeometry(0.92, 40, 40),
+        new THREE.MeshStandardMaterial({
+          map: moonMaps.albedo,
+          bumpMap: moonMaps.bump,
+          bumpScale: 0.1,
+          roughness: 0.9,
+          metalness: 0.04
+        })
+      );
+      rockyMoon.position.set(8.2, 0.5, 1.5);
+      moonOrbit.add(rockyMoon);
+
+      // --- 6,500 顆黑體色溫擬真深空星海 + 銀河塵埃雲 ---
+      const starDotTex = createGlowTexture([
+        [0.0, 'rgba(255,255,255,1.0)'],
+        [0.25, 'rgba(255,255,255,0.75)'],
+        [0.6, 'rgba(200,230,255,0.2)'],
+        [1.0, 'rgba(0,0,0,0.0)']
+      ]);
+
+      function createRealisticStarfield(count, minRadius, maxRadius, baseSize) {
+        const geo = new THREE.BufferGeometry();
+        const positions = new Float32Array(count * 3);
+        const colors = new Float32Array(count * 3);
+
+        // 真實恆星光譜色溫分布 (O/B 藍白、A/F 純白、G 暖黃、K/M 橙紅)
+        const spectralTypes = [
+          { color: new THREE.Color(0x9bb0ff), weight: 0.14 },
+          { color: new THREE.Color(0xcad7ff), weight: 0.24 },
+          { color: new THREE.Color(0xf8f7ff), weight: 0.30 },
+          { color: new THREE.Color(0xfff4ea), weight: 0.18 },
+          { color: new THREE.Color(0xffd2a1), weight: 0.14 }
+        ];
+
+        for (let i = 0; i < count; i++) {
+          const r = minRadius + Math.random() * (maxRadius - minRadius);
+          const theta = Math.random() * Math.PI * 2;
+          // 讓部分恆星略微聚集在銀河盤面附近
+          const isGalactic = Math.random() < 0.42;
+          const u = isGalactic ? (Math.random() - 0.5) * 0.45 : (Math.random() * 2 - 1);
+          const phi = Math.acos(Math.max(-1, Math.min(1, u)));
+
+          let x = r * Math.sin(phi) * Math.cos(theta);
+          let y = r * Math.cos(phi);
+          let z = r * Math.sin(phi) * Math.sin(theta);
+
+          if (isGalactic) {
+            // 傾斜銀河平面 32 度
+            const tilt = 0.56;
+            const ny = y * Math.cos(tilt) - x * Math.sin(tilt);
+            const nx = y * Math.sin(tilt) + x * Math.cos(tilt);
+            x = nx;
+            y = ny;
+          }
+
+          positions[i * 3] = x;
+          positions[i * 3 + 1] = y;
+          positions[i * 3 + 2] = z;
+
+          const roll = Math.random();
+          let acc = 0;
+          let chosen = spectralTypes[2].color;
+          for (let s = 0; s < spectralTypes.length; s++) {
+            acc += spectralTypes[s].weight;
+            if (roll <= acc) {
+              chosen = spectralTypes[s].color;
+              break;
+            }
+          }
+
+          const brightness = 0.55 + Math.random() * 0.45;
+          colors[i * 3] = chosen.r * brightness;
+          colors[i * 3 + 1] = chosen.g * brightness;
+          colors[i * 3 + 2] = chosen.b * brightness;
+        }
+
+        geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        return new THREE.Points(
+          geo,
+          new THREE.PointsMaterial({
+            size: baseSize,
+            map: starDotTex,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.92,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending
+          })
+        );
+      }
+
+      const farStars = createRealisticStarfield(4800, 140, 340, 1.05);
+      const nearStars = createRealisticStarfield(1800, 55, 140, 1.35);
+      universeGroup.add(farStars);
+      universeGroup.add(nearStars);
+
+      // 銀河深空星雲薄霧
+      const nebulaTexA = createGlowTexture([
+        [0.0, 'rgba(56, 189, 248, 0.13)'],
+        [0.45, 'rgba(99, 102, 241, 0.05)'],
+        [1.0, 'rgba(0, 0, 0, 0.0)']
+      ]);
+      const nebulaTexB = createGlowTexture([
+        [0.0, 'rgba(245, 158, 11, 0.10)'],
+        [0.45, 'rgba(139, 92, 246, 0.04)'],
+        [1.0, 'rgba(0, 0, 0, 0.0)']
+      ]);
+
+      [
+        { tex: nebulaTexA, pos: [-38, 22, -75], scale: 110 },
+        { tex: nebulaTexB, pos: [44, -24, -85], scale: 120 },
+        { tex: nebulaTexA, pos: [8, 34, -95], scale: 130 }
+      ].forEach(n => {
+        const sp = new THREE.Sprite(
+          new THREE.SpriteMaterial({
+            map: n.tex,
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending
+          })
+        );
+        sp.position.set(...n.pos);
+        sp.scale.set(n.scale, n.scale, 1);
+        universeGroup.add(sp);
       });
 
-      // 啟動波形動畫
-      window.onload = function () {
-        resizeCanvas();
-        drawDigitalWaveforms();
-      };
-      // 確保 DOM 載入後也立即啟動
-      drawDigitalWaveforms();
+      // 超空間躍遷星軌光束 (Warp Streaks)
+      const warpStreakCount = 300;
+      const warpGeo = new THREE.BufferGeometry();
+      const warpPosArr = new Float32Array(warpStreakCount * 6);
+      const warpSpeedArr = new Float32Array(warpStreakCount);
+
+      for (let i = 0; i < warpStreakCount; i++) {
+        const wx = (Math.random() - 0.5) * 90;
+        const wy = (Math.random() - 0.5) * 65;
+        const wz = (Math.random() - 0.5) * 140;
+        warpPosArr[i * 6] = wx;
+        warpPosArr[i * 6 + 1] = wy;
+        warpPosArr[i * 6 + 2] = wz;
+        warpPosArr[i * 6 + 3] = wx;
+        warpPosArr[i * 6 + 4] = wy;
+        warpPosArr[i * 6 + 5] = wz - 1.0;
+        warpSpeedArr[i] = 1.6 + Math.random() * 2.2;
+      }
+      warpGeo.setAttribute('position', new THREE.BufferAttribute(warpPosArr, 3));
+      const warpMat = new THREE.LineBasicMaterial({
+        color: 0xbae6fd,
+        transparent: true,
+        opacity: 0.0,
+        blending: THREE.AdditiveBlending
+      });
+      const warpStreaks = new THREE.LineSegments(warpGeo, warpMat);
+      universeGroup.add(warpStreaks);
+
+      /* ---------------------------------------------------------
+         10. 互動式宇宙攝影機控制 (滑鼠視差 + 360° 拖曳 + 滾輪縮放)
+      --------------------------------------------------------- */
+      let mouseParallaxX = 0;
+      let mouseParallaxY = 0;
+      let dragYaw = 0;
+      let dragPitch = 0;
+      let currentYaw = 0;
+      let currentPitch = 0;
+
+      let targetCamZ = 34;
+      let currentCamZ = 34;
+
+      let isPointerDown = false;
+      let prevX = 0;
+      let prevY = 0;
+
+      window.addEventListener('mousemove', (e) => {
+        const nx = (e.clientX / window.innerWidth) * 2 - 1;
+        const ny = (e.clientY / window.innerHeight) * 2 - 1;
+        mouseParallaxX = nx * 0.38;
+        mouseParallaxY = ny * 0.24;
+
+        if (isPointerDown) {
+          const dx = e.clientX - prevX;
+          const dy = e.clientY - prevY;
+          dragYaw += dx * 0.0052;
+          dragPitch += dy * 0.0042;
+          dragPitch = Math.max(-0.9, Math.min(0.9, dragPitch));
+          prevX = e.clientX;
+          prevY = e.clientY;
+        }
+      }, { passive: true });
+
+      canvas.addEventListener('mousedown', (e) => {
+        isPointerDown = true;
+        prevX = e.clientX;
+        prevY = e.clientY;
+      });
+      window.addEventListener('mouseup', () => {
+        isPointerDown = false;
+      });
+
+      // 滾輪平滑縮放觀察行星細節
+      canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        targetCamZ += e.deltaY * 0.018;
+        targetCamZ = Math.max(17, Math.min(56, targetCamZ));
+      }, { passive: false });
+
+      // 觸控拖曳支持
+      canvas.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          isPointerDown = true;
+          prevX = e.touches[0].clientX;
+          prevY = e.touches[0].clientY;
+        }
+      }, { passive: true });
+
+      canvas.addEventListener('touchmove', (e) => {
+        if (isPointerDown && e.touches.length === 1) {
+          const dx = e.touches[0].clientX - prevX;
+          const dy = e.touches[0].clientY - prevY;
+          dragYaw += dx * 0.0068;
+          dragPitch += dy * 0.0052;
+          dragPitch = Math.max(-0.9, Math.min(0.9, dragPitch));
+          prevX = e.touches[0].clientX;
+          prevY = e.touches[0].clientY;
+        }
+      }, { passive: true });
+
+      canvas.addEventListener('touchend', () => {
+        isPointerDown = false;
+      });
+
+      resetViewBtn.addEventListener('click', () => {
+        dragYaw = 0;
+        dragPitch = 0;
+        targetCamZ = 34;
+        showToast('星艦軌道視角已重設');
+      });
+
+      // 超空間躍遷觸發
+      let isWarping = false;
+      let warpFactor = 0;
+
+      warpBtn.addEventListener('click', () => {
+        isWarping = true;
+        warpFactor = 1.0;
+        warpLabel.textContent = 'WARPING // 躍遷中';
+        showToast('超空間引擎啟動 // WARP DRIVE ENGAGED');
+        setTimeout(() => {
+          isWarping = false;
+          warpLabel.textContent = 'WARP // 躍遷';
+        }, 1850);
+      });
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      });
+
+      /* ---------------------------------------------------------
+         11. 主渲染循環 (立即啟動並綁定 load 事件雙重保障)
+      --------------------------------------------------------- */
+      let isAnimating = false;
+
+      function animateUniverse() {
+        requestAnimationFrame(animateUniverse);
+
+        const targetYaw = mouseParallaxX + dragYaw;
+        const targetPitch = mouseParallaxY + dragPitch;
+
+        currentYaw += (targetYaw - currentYaw) * 0.055;
+        currentPitch += (targetPitch - currentPitch) * 0.055;
+        currentCamZ += (targetCamZ - currentCamZ) * 0.07;
+
+        universeGroup.rotation.y = currentYaw;
+        universeGroup.rotation.x = currentPitch;
+        camera.position.z = currentCamZ;
+
+        // 行星與雲層、衛星真實差速自轉
+        terranSurface.rotation.y += 0.0014;
+        terranClouds.rotation.y += 0.0021;
+        moonOrbit.rotation.y += 0.0065;
+        rockyMoon.rotation.y += 0.0065;
+
+        gasGiantBody.rotation.y += 0.0024;
+        ringMesh.rotation.z += 0.0005;
+        farStars.rotation.y -= 0.00012;
+
+        // 同步更新著色器中的太陽世界空間方向，確保旋轉宇宙時日夜晨昏線始終正確
+        const worldSunDir = sunDirection.clone().applyQuaternion(universeGroup.quaternion).normalize();
+        sunLight.position.copy(worldSunDir).multiplyScalar(140);
+        terranAtmosphere.material.uniforms.uSunDir.value.copy(worldSunDir);
+        gasGiantAtmo.material.uniforms.uSunDir.value.copy(worldSunDir);
+
+        // 更新頂部遙測讀數
+        if (telemetryReadout) {
+          const yDeg = ((currentYaw * 180 / Math.PI) % 360).toFixed(1);
+          const pDeg = (currentPitch * 180 / Math.PI).toFixed(1);
+          const zoomRatio = (33 / currentCamZ).toFixed(2);
+          telemetryReadout.textContent = `YAW ${yDeg}° · PITCH ${pDeg}° · ZOOM ${zoomRatio}x`;
+        }
+
+        // 超空間躍遷星軌與視野特效
+        if (!isWarping && warpFactor > 0) {
+          warpFactor = Math.max(0, warpFactor - 0.02);
+        }
+
+        const desiredFov = 46 + warpFactor * 16;
+        if (Math.abs(camera.fov - desiredFov) > 0.05) {
+          camera.fov += (desiredFov - camera.fov) * 0.1;
+          camera.updateProjectionMatrix();
+        }
+
+        warpMat.opacity = warpFactor * 0.85;
+        if (warpFactor > 0.01) {
+          const arr = warpGeo.attributes.position.array;
+          for (let i = 0; i < warpStreakCount; i++) {
+            const spd = warpSpeedArr[i] * (1.4 + warpFactor * 4.8);
+            arr[i * 6 + 2] += spd;
+            arr[i * 6 + 5] = arr[i * 6 + 2] - (2.5 + warpFactor * 18);
+            if (arr[i * 6 + 2] > 50) {
+              arr[i * 6 + 2] = -95;
+              arr[i * 6 + 5] = -100;
+            }
+          }
+          warpGeo.attributes.position.needsUpdate = true;
+        }
+
+        renderer.render(scene, camera);
+      }
+
+      function startCosmos() {
+        if (isAnimating) return;
+        isAnimating = true;
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.render(scene, camera);
+        animateUniverse();
+      }
+
+      // 立即渲染首幀，並在 window load 時再次確保畫布尺寸同步
+      startCosmos();
+      window.addEventListener('load', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
     });
   </script>
 </body>
